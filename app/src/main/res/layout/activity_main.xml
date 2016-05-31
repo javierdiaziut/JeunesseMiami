@@ -9,7 +9,8 @@
         android:id="@+id/listview_contactos"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_margin="50dp"></ListView>
+        android:layout_margin="50dp"
+        ></ListView>
 
     <Button
         android:id="@+id/btn_sincronizar"
