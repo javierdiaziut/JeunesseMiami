@@ -5,16 +5,19 @@ package com.appcontactos.javierdiaz.jeunessemiami.modelos;
  */
 public class RowContactsModel {
 
+    private String userid;
     private String name;
+    private String surname;
+    private String email;
     private String number;
     private boolean checked;
 
-    public String getNumber() {
-        return number;
+    public String getUserid() {
+        return userid;
     }
 
-    public void setNumber(String number) {
-        this.number = number;
+    public void setUserid(String userid) {
+        this.userid = userid;
     }
 
     public String getName() {
@@ -25,6 +28,30 @@ public class RowContactsModel {
         this.name = name;
     }
 
+    public String getSurname() {
+        return surname;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getNumber() {
+        return number;
+    }
+
+    public void setNumber(String number) {
+        this.number = number;
+    }
+
     public boolean isChecked() {
         return checked;
     }
@@ -32,8 +59,4 @@ public class RowContactsModel {
     public void setChecked(boolean checked) {
         this.checked = checked;
     }
-
-
-
-
 }

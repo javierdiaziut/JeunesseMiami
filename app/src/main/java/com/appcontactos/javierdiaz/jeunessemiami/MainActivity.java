@@ -12,20 +12,24 @@ import com.appcontactos.javierdiaz.jeunessemiami.adaptadores.CustomArrayAdapter;
 import com.appcontactos.javierdiaz.jeunessemiami.modelos.RowContactsModel;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
     String phoneNumber;
     ListView listView_contactos;
-    ArrayList <String> aa= new ArrayList<String>();
     ArrayList<RowContactsModel> rows = new ArrayList<>();
+    Set<RowContactsModel> listItems;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         listView_contactos = (ListView) findViewById(R.id.listview_contactos);
+        listItems = new HashSet<RowContactsModel>();
+
         getNumber(this.getContentResolver());
     }
 
@@ -35,16 +39,20 @@ public class MainActivity extends AppCompatActivity {
         while (phones.moveToNext())
         {
             RowContactsModel row = new RowContactsModel();
-            String name=phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+            String name= phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+            String lastname= phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.PHONETIC_NAME));
+            String user_id= phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID));
+            String email= phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
             phoneNumber = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-            System.out.println(name +" .................. "+phoneNumber);
+            System.out.println(name +" .................. "+phoneNumber +" Email....."+ email);
             row.setName(name);
             row.setNumber(phoneNumber);
-            rows.add(row);
+            listItems.add(row);
+            //rows.add(row);
 
-            aa.add(phoneNumber);
         }
         phones.close();// close cursor
+
         listView_contactos.setAdapter(new CustomArrayAdapter(this, rows));
         //display contact numbers in the list
     }
