@@ -9,7 +9,7 @@ public class RowContactsModel {
     private String name;
     private String surname;
     private String email;
-    private String number;
+    private String mobile_number;
     private boolean checked;
 
     public String getUserid() {
@@ -44,14 +44,6 @@ public class RowContactsModel {
         this.email = email;
     }
 
-    public String getNumber() {
-        return number;
-    }
-
-    public void setNumber(String number) {
-        this.number = number;
-    }
-
     public boolean isChecked() {
         return checked;
     }
@@ -59,4 +51,13 @@ public class RowContactsModel {
     public void setChecked(boolean checked) {
         this.checked = checked;
     }
+
+    public String getMobile_number() {
+        return mobile_number;
+    }
+
+    public void setMobile_number(String mobile_number) {
+        this.mobile_number = mobile_number;
+    }
+
 }
