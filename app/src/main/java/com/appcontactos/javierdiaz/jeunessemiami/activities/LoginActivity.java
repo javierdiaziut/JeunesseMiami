@@ -7,15 +7,22 @@ import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
 import com.appcontactos.javierdiaz.jeunessemiami.MainActivity;
 import com.appcontactos.javierdiaz.jeunessemiami.R;
+import com.appcontactos.javierdiaz.jeunessemiami.util.Config;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import cz.msebera.android.httpclient.Header;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -46,12 +53,14 @@ public class LoginActivity extends AppCompatActivity {
                             requestPermissions(permissionsNeeded.toArray(new String[permissionsNeeded.size()]),
                                     PERMISSIONS_REQUEST);
                         } else {
-                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                            startActivity(intent);
+                            login();
+                            //Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                            //startActivity(intent);
                         }
                     } else {
-                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                        startActivity(intent);
+                        login();
+//                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+//                        startActivity(intent);
                     }
 
 
@@ -72,5 +81,46 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    private void login(){
+        AsyncHttpClient client = new AsyncHttpClient();
+        RequestParams params = new RequestParams();
+        String url = Config.url+ Config.metodo_login;
+        params.put("user_name","pedro");
+        params.put("user_password","123");
+
+//        for(int i=0; i < rows.size();i++){
+//            if(rows.get(i).isChecked()){
+//                params.put("params1[]",rows.get(i).getUserid());
+//                params.put("params2[]",rows.get(i).getName());
+//                if(rows.get(i).getSurname() == null){
+//                    params.put("params3[]","null");
+//                }else{
+//                    params.put("params3[]",rows.get(i).getSurname());
+//                }
+//                params.put("params3[]",rows.get(i).getSurname());
+//                params.put("params4[]",rows.get(i).getEmail());
+//                params.put("params5[]",rows.get(i).getMobile_number());
+//            }
+//        }
+
+        //Log.e(url, params.toString());
+        AsyncHttpResponseHandler handler = new AsyncHttpResponseHandler(){
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                String txtResponse = String.valueOf(responseBody);
+                Log.e("Conexion Exitosa", String.valueOf(responseBody));
+                Log.e("Conexion Exitosa", String.valueOf(statusCode));
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                Log.e("Error Conexion", String.valueOf(responseBody));
+                Log.e("Error Conexion", String.valueOf(statusCode));
+            }
+        };
+
+        client.get(url,params,handler);
+    }
 
 }

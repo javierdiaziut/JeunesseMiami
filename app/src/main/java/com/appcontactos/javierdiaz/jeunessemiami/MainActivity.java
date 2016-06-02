@@ -23,6 +23,7 @@ import com.appcontactos.javierdiaz.jeunessemiami.modelos.RowContactsModel;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 
@@ -168,55 +169,39 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String url = Config.url+ Config.metodo_contactos;
 
 
-        for(int i=0; i < rows.size();i++){
-            if(rows.get(i).isChecked()){
-                params.put("params1[]",rows.get(i).getUserid());
-                params.put("params2[]",rows.get(i).getName());
-                if(rows.get(i).getSurname() == null){
-                    params.put("params3[]","null");
-                }else{
-                    params.put("params3[]",rows.get(i).getSurname());
-                }
-                params.put("params3[]",rows.get(i).getSurname());
-                params.put("params4[]",rows.get(i).getEmail());
-                params.put("params5[]",rows.get(i).getMobile_number());
-            }
+//        for(int i=0; i < rows.size();i++){
+//            if(rows.get(i).isChecked()){
+//                params.put("params1[]",rows.get(i).getUserid());
+//                params.put("params2[]",rows.get(i).getName());
+//                if(rows.get(i).getSurname() == null){
+//                    params.put("params3[]","null");
+//                }else{
+//                    params.put("params3[]",rows.get(i).getSurname());
+//                }
+//                params.put("params3[]",rows.get(i).getSurname());
+//                params.put("params4[]",rows.get(i).getEmail());
+//                params.put("params5[]",rows.get(i).getMobile_number());
+//            }
+//        }
 
+        //Log.e(url, params.toString());
+        AsyncHttpResponseHandler handler = new AsyncHttpResponseHandler(){
 
-        }
-
-
-
-        Log.e(url, params.toString());
-
-        client.get(url, params, new JsonHttpResponseHandler() {
             @Override
-            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                super.onFailure(statusCode, headers, responseString, throwable);
-
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                String txtResponse = String.valueOf(responseBody);
+                Log.e("Conexion Exitosa", String.valueOf(responseBody));
+                Log.e("Conexion Exitosa", String.valueOf(statusCode));
             }
 
-
-            public void onSuccess(int statusCode, PreferenceActivity.Header[] headers, JSONObject response) {
-                String txtResponse = String.valueOf(response);
-                String error = "";
-                Boolean isError = false;
-
-                Log.e("", txtResponse);
-
-                if (!txtResponse.contains("status\":1")) {
-                    error = "Saving/Editting Destination error";
-                    isError = true;
-                }
-                if (!isError) {
-
-                } else {
-
-
-                }
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                Log.e("Error Conexion", String.valueOf(responseBody));
+                Log.e("Error Conexion", String.valueOf(statusCode));
             }
+        };
 
-        });
+        client.get(url,params,handler);
     }
 }
 
