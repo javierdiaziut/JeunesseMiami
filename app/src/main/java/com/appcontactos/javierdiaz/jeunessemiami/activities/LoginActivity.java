@@ -1,7 +1,6 @@
 package com.appcontactos.javierdiaz.jeunessemiami.activities;
 
 import android.Manifest;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.v4.content.ContextCompat;
@@ -12,17 +11,30 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.appcontactos.javierdiaz.jeunessemiami.MainActivity;
+import com.android.volley.NetworkResponse;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.appcontactos.javierdiaz.jeunessemiami.R;
+import com.appcontactos.javierdiaz.jeunessemiami.util.ApplicationController;
 import com.appcontactos.javierdiaz.jeunessemiami.util.Config;
+import com.appcontactos.javierdiaz.jeunessemiami.util.JsonObjectRequestUtil;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import cz.msebera.android.httpclient.Header;
+import cz.msebera.android.httpclient.HttpStatus;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -30,6 +42,7 @@ public class LoginActivity extends AppCompatActivity {
     private TextView txtPass;
     private Button btnLogin;
     public static final int PERMISSIONS_REQUEST = 0;
+    private Map<String, String> mParams;
 
 
     @Override
@@ -46,19 +59,21 @@ public class LoginActivity extends AppCompatActivity {
                 if(validarCampos(txtUser,txtPass)){
                     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
                         int permissionCheck = ContextCompat.checkSelfPermission(LoginActivity.this, Manifest.permission.READ_CONTACTS );
-                        if(permissionCheck != PackageManager.PERMISSION_GRANTED) {
+                        int permissionInternet = ContextCompat.checkSelfPermission(LoginActivity.this, Manifest.permission.INTERNET );
+                        if((permissionCheck != PackageManager.PERMISSION_GRANTED) || (permissionInternet != PackageManager.PERMISSION_GRANTED) ) {
                             List<String> permissionsNeeded = new ArrayList<String>();
                             permissionsNeeded.add(Manifest.permission.READ_CONTACTS );
+                            permissionsNeeded.add(Manifest.permission.INTERNET );
 
                             requestPermissions(permissionsNeeded.toArray(new String[permissionsNeeded.size()]),
                                     PERMISSIONS_REQUEST);
                         } else {
-                            login();
+                            testLogin();
                             //Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                             //startActivity(intent);
                         }
                     } else {
-                        login();
+                        testLogin();
 //                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
 //                        startActivity(intent);
                     }
@@ -85,6 +100,7 @@ public class LoginActivity extends AppCompatActivity {
         AsyncHttpClient client = new AsyncHttpClient();
         RequestParams params = new RequestParams();
         String url = Config.url+ Config.metodo_login;
+
         params.put("user_name","pedro");
         params.put("user_password","123");
 
@@ -119,8 +135,76 @@ public class LoginActivity extends AppCompatActivity {
                 Log.e("Error Conexion", String.valueOf(statusCode));
             }
         };
-
+        Log.e("URL CONNECTION",url);
+        Log.e("PARAMS",params.toString());
         client.get(url,params,handler);
     }
 
+    private void loginVolley(){
+
+        String url = Config.url+ Config.metodo_login+"user_name=pedro&user_password=123";
+
+        JsonObjectRequest req = new JsonObjectRequest(url, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            VolleyLog.v("Response:%n %s", response.toString(4));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                NetworkResponse networkResponse = error.networkResponse;
+                if (networkResponse != null && networkResponse.statusCode == HttpStatus.SC_UNAUTHORIZED) {
+                    VolleyLog.e("Error: ", networkResponse.statusCode);
+                }
+                VolleyLog.e("Error: ", error.getMessage());
+            }
+
+
+        });
+
+
+        ApplicationController.getInstance(this).addToRequestQueue(req);
+
+    }
+
+   private void testLogin(){
+
+       String url = Config.url+ Config.metodo_login+"user_name=pedro&user_password=123";
+
+       Response.Listener<JSONObject> responseListener = new Response.Listener<JSONObject>() {
+
+           @Override
+           public void onResponse(JSONObject response) {
+               try {
+                   VolleyLog.v("Response:%n %s", response.toString(4));
+               } catch (JSONException e) {
+                   e.printStackTrace();
+               }
+          }
+       };
+
+
+       Response.ErrorListener errorListener = new Response.ErrorListener() {
+
+           @Override
+           public void onErrorResponse(VolleyError error) {
+               NetworkResponse networkResponse = error.networkResponse;
+               if (networkResponse != null && networkResponse.statusCode == HttpStatus.SC_UNAUTHORIZED) {
+                   VolleyLog.e("Error: ", networkResponse.statusCode);
+               }
+               VolleyLog.e("Error: ", error.getMessage());
+
+           }
+       };
+
+       JsonObjectRequestUtil jsonObjectRequest = new JsonObjectRequestUtil(Request.Method.GET, url, null, responseListener, errorListener);
+       jsonObjectRequest.setShouldCache(false);
+       ApplicationController.getInstance(this).addToRequestQueue(jsonObjectRequest);
+
+   }
 }
