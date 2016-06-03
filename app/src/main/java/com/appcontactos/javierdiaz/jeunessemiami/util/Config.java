@@ -11,7 +11,7 @@ public class Config {
     public static String metodo_contactos = "method=addContactsLot";
 
     //Endpoint para hacer login
-    public static String metodo_login = "method=login";
+    public static String metodo_login = "method=login&";
 
     //Endpoint para hacer logout
     public static String metodo_logout = "method=logout";

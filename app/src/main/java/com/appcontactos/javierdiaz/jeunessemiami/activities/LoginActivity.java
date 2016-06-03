@@ -1,6 +1,7 @@
 package com.appcontactos.javierdiaz.jeunessemiami.activities;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.v4.content.ContextCompat;
@@ -10,6 +11,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
@@ -17,6 +19,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.appcontactos.javierdiaz.jeunessemiami.MainActivity;
 import com.appcontactos.javierdiaz.jeunessemiami.R;
 import com.appcontactos.javierdiaz.jeunessemiami.util.ApplicationController;
 import com.appcontactos.javierdiaz.jeunessemiami.util.Config;
@@ -68,12 +71,12 @@ public class LoginActivity extends AppCompatActivity {
                             requestPermissions(permissionsNeeded.toArray(new String[permissionsNeeded.size()]),
                                     PERMISSIONS_REQUEST);
                         } else {
-                            testLogin();
+                            testLogin(txtUser.getText().toString(),txtPass.getText().toString());
                             //Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                             //startActivity(intent);
                         }
                     } else {
-                        testLogin();
+                        testLogin(txtUser.getText().toString(),txtPass.getText().toString());
 //                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
 //                        startActivity(intent);
                     }
@@ -96,95 +99,26 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    private void login(){
-        AsyncHttpClient client = new AsyncHttpClient();
-        RequestParams params = new RequestParams();
-        String url = Config.url+ Config.metodo_login;
 
-        params.put("user_name","pedro");
-        params.put("user_password","123");
+   private void testLogin(String user, String pass){
 
-//        for(int i=0; i < rows.size();i++){
-//            if(rows.get(i).isChecked()){
-//                params.put("params1[]",rows.get(i).getUserid());
-//                params.put("params2[]",rows.get(i).getName());
-//                if(rows.get(i).getSurname() == null){
-//                    params.put("params3[]","null");
-//                }else{
-//                    params.put("params3[]",rows.get(i).getSurname());
-//                }
-//                params.put("params3[]",rows.get(i).getSurname());
-//                params.put("params4[]",rows.get(i).getEmail());
-//                params.put("params5[]",rows.get(i).getMobile_number());
-//            }
-//        }
-
-        //Log.e(url, params.toString());
-        AsyncHttpResponseHandler handler = new AsyncHttpResponseHandler(){
-
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                String txtResponse = String.valueOf(responseBody);
-                Log.e("Conexion Exitosa", String.valueOf(responseBody));
-                Log.e("Conexion Exitosa", String.valueOf(statusCode));
-            }
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                Log.e("Error Conexion", String.valueOf(responseBody));
-                Log.e("Error Conexion", String.valueOf(statusCode));
-            }
-        };
-        Log.e("URL CONNECTION",url);
-        Log.e("PARAMS",params.toString());
-        client.get(url,params,handler);
-    }
-
-    private void loginVolley(){
-
-        String url = Config.url+ Config.metodo_login+"user_name=pedro&user_password=123";
-
-        JsonObjectRequest req = new JsonObjectRequest(url, null,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        try {
-                            VolleyLog.v("Response:%n %s", response.toString(4));
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                NetworkResponse networkResponse = error.networkResponse;
-                if (networkResponse != null && networkResponse.statusCode == HttpStatus.SC_UNAUTHORIZED) {
-                    VolleyLog.e("Error: ", networkResponse.statusCode);
-                }
-                VolleyLog.e("Error: ", error.getMessage());
-            }
-
-
-        });
-
-
-        ApplicationController.getInstance(this).addToRequestQueue(req);
-
-    }
-
-   private void testLogin(){
-
-       String url = Config.url+ Config.metodo_login+"user_name=pedro&user_password=123";
+       //String url = Config.url+ Config.metodo_login;
+       String url = String
+               .format(Config.url+ Config.metodo_login+"user_name=%s&user_password=%s",
+                       user,
+                       pass);
 
        Response.Listener<JSONObject> responseListener = new Response.Listener<JSONObject>() {
 
            @Override
            public void onResponse(JSONObject response) {
-               try {
-                   VolleyLog.v("Response:%n %s", response.toString(4));
-               } catch (JSONException e) {
-                   e.printStackTrace();
+               if(response.has("user_fname")){
+                   Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                   startActivity(intent);
+               }else{
+                   Toast.makeText(getApplicationContext(), "Usuario y/o password invalido",Toast.LENGTH_LONG).show();
                }
+
           }
        };
 

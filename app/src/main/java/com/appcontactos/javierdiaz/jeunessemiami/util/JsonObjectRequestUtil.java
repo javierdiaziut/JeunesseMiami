@@ -17,8 +17,8 @@ import java.util.Map;
  */
 public class JsonObjectRequestUtil extends JsonObjectRequest {
 
-    private String user = "goldenboy";
-    private String pass = "$2a$12$W4cqEjYmpQ7zJ2fBq45mqOUkNoGBR5tZm9GacR/GJ.h8TgSDg2Azm";
+    private String user_name = "pedro";
+    private String user_password = "123";
 
     public JsonObjectRequestUtil(int method, String url, JSONObject jsonRequest, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
         super(method, url, jsonRequest, listener, errorListener);
@@ -31,14 +31,19 @@ public class JsonObjectRequestUtil extends JsonObjectRequest {
     }
 
 
-//    @Override
-//    public Map<String, String> getHeaders() throws AuthFailureError {
-//        Map<String, String> params = new HashMap<String, String>();
-//
-//        String base64EncodedCredentials = "Basic " + Base64.encodeToString(
-//                (user + ":" + pass).getBytes(),
-//                Base64.NO_WRAP);
-//        params.put("Authorization",base64EncodedCredentials);
-//        return params;
-//    }
+    @Override
+    public Map<String, String> getHeaders() throws AuthFailureError {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("user_name", user_name);
+        params.put("user_password",user_password);
+        return params;
+    }
+
+    @Override
+    protected Map<String, String> getParams() throws AuthFailureError {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("user_name", user_name);
+        params.put("user_password",user_password);
+        return super.getParams();
+    }
 }
