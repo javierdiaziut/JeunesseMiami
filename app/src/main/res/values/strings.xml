@@ -1,4 +1,11 @@
 <resources>
     <string name="app_name">JeunesseMiami</string>
     <string name="sincronizar">Sincronizar</string>
+    <string name="sincronizar_contactos">Sincronizando contactos...</string>
+    <string name="error_servicios">Error. Intente más tarde.</string>
+    <string name="cargando">Cargando...</string>
+    <string name="cerrar_sesion">¿Desea cerrar sesión?</string>
+    <string name="gracias_por_su_visita">Gracias por su visita</string>
+    <string name="seleccionar_todos">Seleccionar todos</string>
+    <string name="deseleccionar_todos">Deseleccionar todos</string>
 </resources>

@@ -1,6 +1,7 @@
 package com.appcontactos.javierdiaz.jeunessemiami.activities;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -45,7 +46,8 @@ public class LoginActivity extends AppCompatActivity {
     private TextView txtPass;
     private Button btnLogin;
     public static final int PERMISSIONS_REQUEST = 0;
-    private Map<String, String> mParams;
+    protected ProgressDialog mProgressDialog;
+    public static String userid;
 
 
     @Override
@@ -56,6 +58,8 @@ public class LoginActivity extends AppCompatActivity {
         txtUser = (TextView) findViewById(R.id.login_username);
         txtPass = (TextView) findViewById(R.id.login_password);
         btnLogin =(Button) findViewById(R.id.login_button);
+        mProgressDialog = new ProgressDialog(this);
+        userid ="";
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -72,13 +76,10 @@ public class LoginActivity extends AppCompatActivity {
                                     PERMISSIONS_REQUEST);
                         } else {
                             testLogin(txtUser.getText().toString(),txtPass.getText().toString());
-                            //Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                            //startActivity(intent);
                         }
                     } else {
                         testLogin(txtUser.getText().toString(),txtPass.getText().toString());
-//                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-//                        startActivity(intent);
+
                     }
 
 
@@ -101,8 +102,8 @@ public class LoginActivity extends AppCompatActivity {
 
 
    private void testLogin(String user, String pass){
-
-       //String url = Config.url+ Config.metodo_login;
+       userid = "";
+       showProgressDialog(getString(R.string.cargando));
        String url = String
                .format(Config.url+ Config.metodo_login+"user_name=%s&user_password=%s",
                        user,
@@ -112,7 +113,13 @@ public class LoginActivity extends AppCompatActivity {
 
            @Override
            public void onResponse(JSONObject response) {
+               dismissProgressDialog();
                if(response.has("user_fname")){
+                   try {
+                       userid = response.getString("user_id");
+                   } catch (JSONException e) {
+                       e.printStackTrace();
+                   }
                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                    startActivity(intent);
                }else{
@@ -127,6 +134,8 @@ public class LoginActivity extends AppCompatActivity {
 
            @Override
            public void onErrorResponse(VolleyError error) {
+               dismissProgressDialog();
+               Toast.makeText(getApplicationContext(), getString(R.string.error_servicios),Toast.LENGTH_LONG).show();
                NetworkResponse networkResponse = error.networkResponse;
                if (networkResponse != null && networkResponse.statusCode == HttpStatus.SC_UNAUTHORIZED) {
                    VolleyLog.e("Error: ", networkResponse.statusCode);
@@ -141,4 +150,31 @@ public class LoginActivity extends AppCompatActivity {
        ApplicationController.getInstance(this).addToRequestQueue(jsonObjectRequest);
 
    }
+
+    /**
+     * show a progress dialog with a custom message
+     *
+     * @param message
+     */
+    public void showProgressDialog(String message) {
+        if (mProgressDialog != null) {
+            mProgressDialog.setMessage(message);
+            mProgressDialog.show();
+        } else {
+            Log.e("LoginActivity.class", "Error al mostrar el Progress Dialog");
+        }
+    }
+
+    /**
+     * hide the progress dialog
+     */
+    public void dismissProgressDialog() {
+        if (mProgressDialog != null) {
+            if (mProgressDialog.isShowing()) {
+                mProgressDialog.dismiss();
+            }
+        } else {
+            Log.e("LoginActivity.class", "Error al mostrar el Progress Dialog");
+        }
+    }
 }

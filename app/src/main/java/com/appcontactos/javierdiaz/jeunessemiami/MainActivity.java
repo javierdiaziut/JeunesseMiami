@@ -1,13 +1,18 @@
 package com.appcontactos.javierdiaz.jeunessemiami;
 
 
+import android.app.ProgressDialog;
 import android.content.ContentResolver;
+import android.content.DialogInterface;
 import android.content.Intent;
 import cz.msebera.android.httpclient.Header;
+import cz.msebera.android.httpclient.HttpStatus;
+
 import android.database.Cursor;
 import android.net.Uri;
 import android.preference.PreferenceActivity;
 import android.provider.ContactsContract;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,7 +21,15 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.android.volley.NetworkResponse;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+import com.appcontactos.javierdiaz.jeunessemiami.activities.LoginActivity;
+import com.appcontactos.javierdiaz.jeunessemiami.util.ApplicationController;
 import com.appcontactos.javierdiaz.jeunessemiami.util.Config;
+import com.appcontactos.javierdiaz.jeunessemiami.util.JsonObjectRequestUtil;
 import com.loopj.android.http.AsyncHttpClient;
 import com.appcontactos.javierdiaz.jeunessemiami.adaptadores.CustomArrayAdapter;
 import com.appcontactos.javierdiaz.jeunessemiami.modelos.RowContactsModel;
@@ -27,6 +40,7 @@ import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -40,6 +54,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     ArrayList<RowContactsModel> rows = new ArrayList<>();
     HashMap<Double, RowContactsModel> listItems;
     private Button btnSincronizar;
+    CustomArrayAdapter customArrayAdapter;
+    private Button btn_selecc_all;
+    private Button btn_unselecc_all;
+    /**
+     * activity progress dialog
+     */
+    protected ProgressDialog mProgressDialog;
+
 
     private GoogleApiClient client;
 
@@ -50,8 +72,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
         listView_contactos = (ListView) findViewById(R.id.listview_contactos);
         btnSincronizar = (Button) findViewById(R.id.btn_sincronizar);
+        btn_selecc_all = (Button) findViewById(R.id.btn_selecctodos);
+        btn_unselecc_all = (Button) findViewById(R.id.btn_deselecctodos);
         btnSincronizar.setOnClickListener(this);
+        btn_selecc_all.setOnClickListener(this);
+        btn_unselecc_all.setOnClickListener(this);
         listItems = new HashMap<>();
+
+        mProgressDialog = new ProgressDialog(this);
 
         getNumber(this.getContentResolver());
         // ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -80,6 +108,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (email != null) {
                 row.setEmail(email);
             }
+            row.setChecked(true);
 
             listItems.put(getFotmatedNumber(phoneNumber), row);
 
@@ -87,7 +116,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         phones.close();// close cursor
         rows.addAll(listItems.values());
         listView_contactos.setItemsCanFocus(true);
-        listView_contactos.setAdapter(new CustomArrayAdapter(this, rows));
+        customArrayAdapter = new CustomArrayAdapter(this,rows);
+        listView_contactos.setAdapter(customArrayAdapter);
 
 
     }
@@ -110,98 +140,201 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     @Override
-    public void onStart() {
-        super.onStart();
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client.connect();
-        Action viewAction = Action.newAction(
-                Action.TYPE_VIEW, // TODO: choose an action type.
-                "Main Page", // TODO: Define a title for the content shown.
-                // TODO: If you have web page content that matches this app activity's content,
-                // make sure this auto-generated web page URL is correct.
-                // Otherwise, set the URL to null.
-                Uri.parse("http://host/path"),
-                // TODO: Make sure this auto-generated app URL is correct.
-                Uri.parse("android-app://com.appcontactos.javierdiaz.jeunessemiami/http/host/path")
-        );
-        AppIndex.AppIndexApi.start(client, viewAction);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        Action viewAction = Action.newAction(
-                Action.TYPE_VIEW, // TODO: choose an action type.
-                "Main Page", // TODO: Define a title for the content shown.
-                // TODO: If you have web page content that matches this app activity's content,
-                // make sure this auto-generated web page URL is correct.
-                // Otherwise, set the URL to null.
-                Uri.parse("http://host/path"),
-                // TODO: Make sure this auto-generated app URL is correct.
-                Uri.parse("android-app://com.appcontactos.javierdiaz.jeunessemiami/http/host/path")
-        );
-        AppIndex.AppIndexApi.end(client, viewAction);
-        client.disconnect();
-    }
-
-    @Override
     public void onClick(View v) {
-        int count=0;
-        for(int i = 0; i< rows.size(); i++){
-                if(rows.get(i).isChecked()){
-                    count ++;
+
+        switch(v.getId()) {
+            case R.id.btn_sincronizar:
+                int count=0;
+                for(int i = 0; i< rows.size(); i++){
+                    if(rows.get(i).isChecked()){
+                        count ++;
+                    }
                 }
+
+                if(count > 0){
+                    sincronizarContactos(rows);
+                }else{
+                    Toast.makeText(getApplicationContext(),"Debe seleccionar al menos un(1) contacto", Toast.LENGTH_LONG).show();
+                }
+                break;
+            case R.id.btn_selecctodos:
+                selectAll();
+                break;
+            case R.id.btn_deselecctodos:
+                unSelectAll();
+                break;
         }
 
-        if(count > 0){
-            sincronizar();
-        }
+
     }
 
-    private void sincronizar(){
-        AsyncHttpClient client = new AsyncHttpClient();
-        RequestParams params = new RequestParams();
-        String url = Config.url+ Config.metodo_contactos;
+
+    private void sincronizarContactos(ArrayList<RowContactsModel> arrayContacts){
+        showProgressDialog(getString(R.string.sincronizar_contactos));
+
+        String patron ="param1[]=%s&param2[]=%s&param3[]=%s&param4[]=%s&param5[]=%s&";
+        String url = Config.url_sincronizar+ Config.metodo_contactos;
+
+                for(int i=0; i < rows.size();i++){
+                     if(rows.get(i).isChecked()){
+                        String lastname="";
 
 
-//        for(int i=0; i < rows.size();i++){
-//            if(rows.get(i).isChecked()){
-//                params.put("params1[]",rows.get(i).getUserid());
-//                params.put("params2[]",rows.get(i).getName());
-//                if(rows.get(i).getSurname() == null){
-//                    params.put("params3[]","null");
-//                }else{
-//                    params.put("params3[]",rows.get(i).getSurname());
-//                }
-//                params.put("params3[]",rows.get(i).getSurname());
-//                params.put("params4[]",rows.get(i).getEmail());
-//                params.put("params5[]",rows.get(i).getMobile_number());
-//            }
-//        }
+                      if(rows.get(i).getSurname() == null){
+                          lastname ="null";
+                        }else{
+                          lastname = rows.get(i).getSurname();
+                      }
 
-        //Log.e(url, params.toString());
-        AsyncHttpResponseHandler handler = new AsyncHttpResponseHandler(){
+                     String params = String.format(patron,rows.get(i).getUserid(),rows.get(i).getName(),lastname
+                                 ,rows.get(i).getSurname(),rows.get(i).getEmail(),rows.get(i).getMobile_number());
+                     url += params;
+                     }
+                    }
+
+
+
+
+
+        Response.Listener<JSONObject> responseListener = new Response.Listener<JSONObject>() {
 
             @Override
-            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                String txtResponse = String.valueOf(responseBody);
-                Log.e("Conexion Exitosa", String.valueOf(responseBody));
-                Log.e("Conexion Exitosa", String.valueOf(statusCode));
-            }
+            public void onResponse(JSONObject response) {
+                dismissProgressDialog();
+
+                try {
+                    String mensaje = response.getString("mensaje");
+                    Toast.makeText(getApplicationContext(), mensaje,Toast.LENGTH_LONG).show();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                           }
+        };
+
+
+        Response.ErrorListener errorListener = new Response.ErrorListener() {
 
             @Override
-            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                Log.e("Error Conexion", String.valueOf(responseBody));
-                Log.e("Error Conexion", String.valueOf(statusCode));
+            public void onErrorResponse(VolleyError error) {
+                dismissProgressDialog();
+                Toast.makeText(getApplicationContext(), getString(R.string.error_servicios),Toast.LENGTH_LONG).show();
+                NetworkResponse networkResponse = error.networkResponse;
+                if (networkResponse != null && networkResponse.statusCode == HttpStatus.SC_UNAUTHORIZED) {
+                    VolleyLog.e("Error: ", networkResponse.statusCode);
+                }
+                VolleyLog.e("Error: ", error.getMessage());
+
             }
         };
 
-        client.get(url,params,handler);
+        JsonObjectRequestUtil jsonObjectRequest = new JsonObjectRequestUtil(Request.Method.GET, url, null, responseListener, errorListener);
+        jsonObjectRequest.setShouldCache(false);
+        ApplicationController.getInstance(this).addToRequestQueue(jsonObjectRequest);
+
+    }
+
+    /**
+     * show a progress dialog with a custom message
+     *
+     * @param message
+     */
+    public void showProgressDialog(String message) {
+        if (mProgressDialog != null) {
+            mProgressDialog.setMessage(message);
+            mProgressDialog.show();
+        } else {
+            Log.e("MainActivity.class", "Error al mostrar el Progress Dialog");
+        }
+    }
+
+    /**
+     * hide the progress dialog
+     */
+    public void dismissProgressDialog() {
+        if (mProgressDialog != null) {
+            if (mProgressDialog.isShowing()) {
+                mProgressDialog.dismiss();
+            }
+        } else {
+            Log.e("MainActivity.class", "Error al mostrar el Progress Dialog");
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        new AlertDialog.Builder(this)
+                .setMessage(getString(R.string.cerrar_sesion))
+                .setCancelable(false)
+                .setPositiveButton("Si", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        logout(LoginActivity.userid);
+
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+
+                    }
+                })
+                .show();
+
+
+    }
+
+    private void logout(String iduser){
+        showProgressDialog(getString(R.string.cargando));
+
+        String url = String
+                .format(Config.url+ Config.metodo_logout+"user_id=%s",
+                        iduser);
+        Response.Listener<JSONObject> responseListener = new Response.Listener<JSONObject>() {
+
+            @Override
+            public void onResponse(JSONObject response) {
+                dismissProgressDialog();
+                Toast.makeText(getApplicationContext(), getString(R.string.gracias_por_su_visita),Toast.LENGTH_LONG).show();
+                finish();
+            }
+        };
+
+
+        Response.ErrorListener errorListener = new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                dismissProgressDialog();
+                Toast.makeText(getApplicationContext(), getString(R.string.error_servicios),Toast.LENGTH_LONG).show();
+                NetworkResponse networkResponse = error.networkResponse;
+                if (networkResponse != null && networkResponse.statusCode == HttpStatus.SC_UNAUTHORIZED) {
+                    VolleyLog.e("Error: ", networkResponse.statusCode);
+                }
+                VolleyLog.e("Error: ", error.getMessage());
+
+            }
+        };
+
+        JsonObjectRequestUtil jsonObjectRequest = new JsonObjectRequestUtil(Request.Method.GET, url, null, responseListener, errorListener);
+        jsonObjectRequest.setShouldCache(false);
+        ApplicationController.getInstance(this).addToRequestQueue(jsonObjectRequest);
+
+    }
+
+    private void selectAll(){
+
+        for(int i = 0;i < rows.size(); i++){
+            rows.get(i).setChecked(true);
+        }
+        customArrayAdapter.notifyDataSetChanged();
+
+
+    }
+
+    private void unSelectAll(){
+
+        for(int i = 0;i < rows.size(); i++){
+            rows.get(i).setChecked(false);
+        }
+        customArrayAdapter.notifyDataSetChanged();
     }
 }
 
