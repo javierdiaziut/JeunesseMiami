@@ -5,6 +5,10 @@
 
     <solid android:color="@color/white_transparent" />
 
+    <stroke
+        android:width="2dp"
+        android:color="@color/main" />
+
     <padding
         android:bottom="10dp"
         android:left="0dp"

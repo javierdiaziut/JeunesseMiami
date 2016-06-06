@@ -122,6 +122,8 @@ public class LoginActivity extends AppCompatActivity {
                    }
                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                    startActivity(intent);
+                   txtUser.setText("");
+                   txtPass.setText("");
                }else{
                    Toast.makeText(getApplicationContext(), "Usuario y/o password invalido",Toast.LENGTH_LONG).show();
                }
