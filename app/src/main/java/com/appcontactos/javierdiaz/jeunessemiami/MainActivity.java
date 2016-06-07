@@ -44,7 +44,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
@@ -88,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public void getNumber(ContentResolver cr) {
-        Cursor phones = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null);
+        Cursor phones = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC");
         while (phones.moveToNext()) {
             RowContactsModel row = new RowContactsModel();
             String name = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
@@ -96,7 +100,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             String user_id = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID));
             String email = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
             phoneNumber = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-            System.out.println(name + " .................. " + phoneNumber + " Email....." + email);
+            System.out.println(name + " .................. " + phoneNumber + "ID............." + user_id);
             row.setName(name);
             row.setMobile_number(phoneNumber);
             if (lastname != null) {
@@ -115,6 +119,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         phones.close();// close cursor
         rows.addAll(listItems.values());
+        Collections.sort(rows, new Comparator<RowContactsModel>() {
+            public int compare(RowContactsModel v1, RowContactsModel v2) {
+                return v1.getName().compareToIgnoreCase(v2.getName());
+            }
+        });
+
         listView_contactos.setItemsCanFocus(true);
         customArrayAdapter = new CustomArrayAdapter(this,rows);
         listView_contactos.setAdapter(customArrayAdapter);
@@ -335,6 +345,46 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             rows.get(i).setChecked(false);
         }
         customArrayAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Main Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app URL is correct.
+                Uri.parse("android-app://com.appcontactos.javierdiaz.jeunessemiami/http/host/path")
+        );
+        AppIndex.AppIndexApi.start(client, viewAction);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Main Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app URL is correct.
+                Uri.parse("android-app://com.appcontactos.javierdiaz.jeunessemiami/http/host/path")
+        );
+        AppIndex.AppIndexApi.end(client, viewAction);
+        client.disconnect();
     }
 }
 
