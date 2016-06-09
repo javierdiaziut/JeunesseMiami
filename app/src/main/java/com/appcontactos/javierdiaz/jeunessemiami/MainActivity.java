@@ -3,6 +3,7 @@ package com.appcontactos.javierdiaz.jeunessemiami;
 
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import cz.msebera.android.httpclient.Header;
@@ -21,14 +22,19 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
+import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.appcontactos.javierdiaz.jeunessemiami.activities.LoginActivity;
 import com.appcontactos.javierdiaz.jeunessemiami.util.ApplicationController;
 import com.appcontactos.javierdiaz.jeunessemiami.util.Config;
+import com.appcontactos.javierdiaz.jeunessemiami.util.JsonObjectRequestContacts;
 import com.appcontactos.javierdiaz.jeunessemiami.util.JsonObjectRequestUtil;
 import com.loopj.android.http.AsyncHttpClient;
 import com.appcontactos.javierdiaz.jeunessemiami.adaptadores.CustomArrayAdapter;
@@ -49,18 +55,20 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
 
-    String phoneNumber;
-    ListView listView_contactos;
-    ArrayList<RowContactsModel> rows = new ArrayList<>();
-    HashMap<Double, RowContactsModel> listItems;
+    private String phoneNumber;
+    private ListView listView_contactos;
+    private ArrayList<RowContactsModel> rows = new ArrayList<>();
+    private HashMap<Double, RowContactsModel> listItems;
     private Button btnSincronizar;
-    CustomArrayAdapter customArrayAdapter;
+    private CustomArrayAdapter customArrayAdapter;
     private Button btn_selecc_all;
     private Button btn_unselecc_all;
+    private int pendingRequests = 0;
     /**
      * activity progress dialog
      */
@@ -98,7 +106,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             String name = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
             String lastname = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.PHONETIC_NAME));
             String user_id = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID));
-            String email = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
             phoneNumber = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
             System.out.println(name + " .................. " + phoneNumber + "ID............." + user_id);
             row.setName(name);
@@ -109,10 +116,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (user_id != null) {
                 row.setUserid(user_id);
             }
-            if (email != null) {
-                row.setEmail(email);
-            }
+
             row.setChecked(true);
+            Cursor emails = cr.query(ContactsContract.CommonDataKinds.Email.CONTENT_URI,null, ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = " + user_id, null, null);
+            while (emails.moveToNext())
+            {
+                String email1 = emails.getString(emails.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
+                row.setEmail(email1);
+                break;
+            }
+            emails.close();
 
             listItems.put(getFotmatedNumber(phoneNumber), row);
 
@@ -162,7 +175,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
 
                 if(count > 0){
-                    sincronizarContactos(rows);
+                    showProgressDialog(getString(R.string.sincronizar_contactos));
+                    for(int i = 0; i< rows.size(); i++){
+                        if(rows.get(i).isChecked()){
+                            synContacto(getApplicationContext(),rows.get(i).getUserid(),rows.get(i).getName(),
+                                    rows.get(i).getSurname(),rows.get(i).getEmail(),rows.get(i).getMobile_number());
+                            pendingRequests++;
+                        }
+                    }
+
                 }else{
                     Toast.makeText(getApplicationContext(),"Debe seleccionar al menos un(1) contacto", Toast.LENGTH_LONG).show();
                 }
@@ -175,71 +196,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
         }
 
-
-    }
-
-
-    private void sincronizarContactos(ArrayList<RowContactsModel> arrayContacts){
-        showProgressDialog(getString(R.string.sincronizar_contactos));
-
-        String patron ="param1[]=%s&param2[]=%s&param3[]=%s&param4[]=%s&param5[]=%s&";
-        String url = Config.url_sincronizar+ Config.metodo_contactos;
-
-                for(int i=0; i < rows.size();i++){
-                     if(rows.get(i).isChecked()){
-                        String lastname="";
-
-
-                      if(rows.get(i).getSurname() == null){
-                          lastname ="null";
-                        }else{
-                          lastname = rows.get(i).getSurname();
-                      }
-
-                     String params = String.format(patron,rows.get(i).getUserid(),rows.get(i).getName(),lastname
-                                 ,rows.get(i).getSurname(),rows.get(i).getEmail(),rows.get(i).getMobile_number());
-                     url += params;
-                     }
-                    }
-
-
-
-
-
-        Response.Listener<JSONObject> responseListener = new Response.Listener<JSONObject>() {
-
-            @Override
-            public void onResponse(JSONObject response) {
-                dismissProgressDialog();
-
-                try {
-                    String mensaje = response.getString("mensaje");
-                    Toast.makeText(getApplicationContext(), mensaje,Toast.LENGTH_LONG).show();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                           }
-        };
-
-
-        Response.ErrorListener errorListener = new Response.ErrorListener() {
-
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                dismissProgressDialog();
-                Toast.makeText(getApplicationContext(), getString(R.string.error_servicios),Toast.LENGTH_LONG).show();
-                NetworkResponse networkResponse = error.networkResponse;
-                if (networkResponse != null && networkResponse.statusCode == HttpStatus.SC_UNAUTHORIZED) {
-                    VolleyLog.e("Error: ", networkResponse.statusCode);
-                }
-                VolleyLog.e("Error: ", error.getMessage());
-
-            }
-        };
-
-        JsonObjectRequestUtil jsonObjectRequest = new JsonObjectRequestUtil(Request.Method.GET, url, null, responseListener, errorListener);
-        jsonObjectRequest.setShouldCache(false);
-        ApplicationController.getInstance(this).addToRequestQueue(jsonObjectRequest);
 
     }
 
@@ -347,44 +303,65 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         customArrayAdapter.notifyDataSetChanged();
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
+    public void synContacto(Context context, final String userid, final String nombre, final String apellido, final String correo, final String tlf){
+        String url = Config.url_sincronizar;
+        RequestQueue queue = Volley.newRequestQueue(context);
+        StringRequest sr = new StringRequest(Request.Method.POST,url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.d("INSERTAR CONTACTO",response);
+                pendingRequests--;
+                if(pendingRequests == 0){
+                    dismissProgressDialog();
+                    Toast.makeText(getApplicationContext(), "Usuarios sincronizados satisfactoriamente",Toast.LENGTH_LONG).show();
 
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client.connect();
-        Action viewAction = Action.newAction(
-                Action.TYPE_VIEW, // TODO: choose an action type.
-                "Main Page", // TODO: Define a title for the content shown.
-                // TODO: If you have web page content that matches this app activity's content,
-                // make sure this auto-generated web page URL is correct.
-                // Otherwise, set the URL to null.
-                Uri.parse("http://host/path"),
-                // TODO: Make sure this auto-generated app URL is correct.
-                Uri.parse("android-app://com.appcontactos.javierdiaz.jeunessemiami/http/host/path")
-        );
-        AppIndex.AppIndexApi.start(client, viewAction);
-    }
+                }
 
-    @Override
-    public void onStop() {
-        super.onStop();
 
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        Action viewAction = Action.newAction(
-                Action.TYPE_VIEW, // TODO: choose an action type.
-                "Main Page", // TODO: Define a title for the content shown.
-                // TODO: If you have web page content that matches this app activity's content,
-                // make sure this auto-generated web page URL is correct.
-                // Otherwise, set the URL to null.
-                Uri.parse("http://host/path"),
-                // TODO: Make sure this auto-generated app URL is correct.
-                Uri.parse("android-app://com.appcontactos.javierdiaz.jeunessemiami/http/host/path")
-        );
-        AppIndex.AppIndexApi.end(client, viewAction);
-        client.disconnect();
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                pendingRequests--;
+                if(pendingRequests == 0){
+                    dismissProgressDialog();
+                    Toast.makeText(getApplicationContext(), "Usuarios sincronizados satisfactoriamente",Toast.LENGTH_LONG).show();
+
+                }Log.d("ERROR AL INSERTAR",error.toString());
+                //Toast.makeText(getApplicationContext(), error.getMessage(),Toast.LENGTH_LONG).show();
+
+            }
+        }){
+            @Override
+            protected Map<String,String> getParams(){
+                Map<String,String> params = new HashMap<String, String>();
+                params.put("method","addContactsLot");
+                params.put("param1[]",LoginActivity.userid);
+                params.put("param2[]",nombre);
+                if(apellido != null){
+                    params.put("param3[]",apellido);
+                }else
+                {
+                    params.put("param3[]"," ");
+                }
+                if(correo != null){
+                    params.put("param4[]",correo);
+                }else
+                {
+                    params.put("param4[]"," ");
+                }
+                params.put("param5[]",tlf);
+
+                return params;
+            }
+
+
+        };
+        sr.setRetryPolicy(new DefaultRetryPolicy(9000 * 27000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+
+        queue.add(sr);
     }
 }
 
