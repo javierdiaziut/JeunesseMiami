@@ -302,6 +302,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         customArrayAdapter.notifyDataSetChanged();
     }
+    /*
+    Método para sincrinizar los contactos en bd remota. No se sincroniza por lote.
+     */
 
     public void synContacto(Context context, final String userid, final String nombre, final String apellido, final String correo, final String tlf){
         String url = Config.url_sincronizar;
@@ -325,7 +328,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 pendingRequests--;
                 if(pendingRequests == 0){
                     dismissProgressDialog();
-                    Toast.makeText(getApplicationContext(), "Usuarios sincronizados satisfactoriamente",Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "Usuarios sincronizados con errores",Toast.LENGTH_LONG).show();
 
                 }Log.d("ERROR AL INSERTAR",error.toString());
                 //Toast.makeText(getApplicationContext(), error.getMessage(),Toast.LENGTH_LONG).show();
@@ -342,13 +345,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     params.put("param3[]",apellido);
                 }else
                 {
-                    params.put("param3[]"," ");
+                    params.put("param3[]","apellido");
                 }
                 if(correo != null){
                     params.put("param4[]",correo);
                 }else
                 {
-                    params.put("param4[]"," ");
+                    params.put("param4[]","email"+userid+"@email.com");
                 }
                 params.put("param5[]",tlf);
 
@@ -357,7 +360,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
         };
-        sr.setRetryPolicy(new DefaultRetryPolicy(9000 * 27000,
+        sr.setRetryPolicy(new DefaultRetryPolicy(12000 * 27000,
                 DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 
