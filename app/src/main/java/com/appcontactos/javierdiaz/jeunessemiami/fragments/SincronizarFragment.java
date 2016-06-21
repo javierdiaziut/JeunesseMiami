@@ -79,9 +79,9 @@ public class SincronizarFragment extends Fragment implements View.OnClickListene
         listItems = new HashMap<>();
 
         mProgressDialog = new ProgressDialog(getContext());
-
+        showProgressDialog("Cargando contactos..");
         getNumber(getActivity().getContentResolver());
-
+        dismissProgressDialog();
         return view;
     }
 

@@ -1,78 +1,65 @@
 package com.appcontactos.javierdiaz.jeunessemiami.fragments;
 
+import android.app.ProgressDialog;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ListView;
 
 import com.appcontactos.javierdiaz.jeunessemiami.R;
+import com.appcontactos.javierdiaz.jeunessemiami.adaptadores.CustomArrayAdapter;
+import com.appcontactos.javierdiaz.jeunessemiami.modelos.RowContactsModel;
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link SendsSmsFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link SendsSmsFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
-public class SendsSmsFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
 
-    private OnFragmentInteractionListener mListener;
+public class SendsSmsFragment extends Fragment implements View.OnClickListener{
+    private String phoneNumber;
+    private ListView listView_contactos;
+    private ArrayList<RowContactsModel> rows = new ArrayList<>();
+    private HashMap<Double, RowContactsModel> listItems;
+    private Button btnSincronizar;
+    private CustomArrayAdapter customArrayAdapter;
+    protected ProgressDialog mProgressDialog;
 
     public SendsSmsFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment SendsSmsFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static SendsSmsFragment newInstance(String param1, String param2) {
-        SendsSmsFragment fragment = new SendsSmsFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_sends_sms, container, false);
-    }
+        View view = inflater.inflate(R.layout.fragment_sends_sms, container, false);
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
+        listView_contactos = (ListView) view.findViewById(R.id.listview_contactos);
+        btnSincronizar = (Button) view.findViewById(R.id.btn_sincronizar);
+        btnSincronizar.setOnClickListener(this);
+        listItems = new HashMap<>();
+
+        mProgressDialog = new ProgressDialog(getContext());
+        showProgressDialog("Cargando contactos..");
+        getNumber(getActivity().getContentResolver());
+        dismissProgressDialog();
+
+        return view;
     }
 
     @Override
@@ -84,21 +71,116 @@ public class SendsSmsFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
+    }
+
+    public void getNumber(ContentResolver cr) {
+        Cursor phones = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC");
+        while (phones.moveToNext()) {
+            RowContactsModel row = new RowContactsModel();
+            String name = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+            String lastname = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.PHONETIC_NAME));
+            String user_id = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID));
+            phoneNumber = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+            System.out.println(name + " .................. " + phoneNumber + "ID............." + user_id);
+            row.setName(name);
+            row.setMobile_number(phoneNumber);
+            if (lastname != null) {
+                row.setSurname(lastname);
+            }
+            if (user_id != null) {
+                row.setUserid(user_id);
+            }
+
+            row.setChecked(true);
+            Cursor emails = cr.query(ContactsContract.CommonDataKinds.Email.CONTENT_URI, null, ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = " + user_id, null, null);
+            while (emails.moveToNext()) {
+                String email1 = emails.getString(emails.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
+                row.setEmail(email1);
+                break;
+            }
+            emails.close();
+
+            listItems.put(getFotmatedNumber(phoneNumber), row);
+
+        }
+        phones.close();// close cursor
+        rows.addAll(listItems.values());
+        Collections.sort(rows, new Comparator<RowContactsModel>() {
+            public int compare(RowContactsModel v1, RowContactsModel v2) {
+                return v1.getName().compareToIgnoreCase(v2.getName());
+            }
+        });
+
+        listView_contactos.setItemsCanFocus(true);
+        customArrayAdapter = new CustomArrayAdapter(getActivity(), rows);
+        listView_contactos.setAdapter(customArrayAdapter);
+
+
+    }
+
+    /*
+    Metodo que formatea el num de tlf para usarlo como un key en el hashmap y no se repitan los num
+     */
+    private static Double getFotmatedNumber(String number) {
+        Double result = 0.0;
+        try {
+            number = number.replace(" ", "");
+            number = number.replace("+", "");
+            number = number.replace("-", "");
+            result = Double.valueOf(number);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 
     /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
+     * show a progress dialog with a custom message
+     *
+     * @param message
      */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+    public void showProgressDialog(String message) {
+        if (mProgressDialog != null) {
+            mProgressDialog.setMessage(message);
+            mProgressDialog.show();
+        } else {
+            Log.e("MainActivity.class", "Error al mostrar el Progress Dialog");
+        }
+    }
+
+    /**
+     * hide the progress dialog
+     */
+    public void dismissProgressDialog() {
+        if (mProgressDialog != null) {
+            if (mProgressDialog.isShowing()) {
+                mProgressDialog.dismiss();
+            }
+        } else {
+            Log.e("MainActivity.class", "Error al mostrar el Progress Dialog");
+        }
+    }
+
+    private void selectAll() {
+
+        for (int i = 0; i < rows.size(); i++) {
+            rows.get(i).setChecked(true);
+        }
+        customArrayAdapter.notifyDataSetChanged();
+
+
+    }
+
+    private void unSelectAll() {
+
+        for (int i = 0; i < rows.size(); i++) {
+            rows.get(i).setChecked(false);
+        }
+        customArrayAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onClick(View v) {
+
     }
 }
