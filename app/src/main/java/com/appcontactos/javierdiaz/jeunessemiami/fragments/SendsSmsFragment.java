@@ -19,6 +19,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.appcontactos.javierdiaz.jeunessemiami.R;
+import com.appcontactos.javierdiaz.jeunessemiami.activities.NevigationActivity;
 import com.appcontactos.javierdiaz.jeunessemiami.adaptadores.CustomArrayAdapter;
 import com.appcontactos.javierdiaz.jeunessemiami.modelos.RowContactsModel;
 
@@ -31,7 +32,6 @@ import java.util.HashMap;
 public class SendsSmsFragment extends Fragment implements View.OnClickListener {
     private String phoneNumber;
     private ListView listView_contactos;
-    private ArrayList<RowContactsModel> rows = new ArrayList<>();
     private HashMap<Double, RowContactsModel> listItems;
     private Button btnSincronizar;
     private CustomArrayAdapter customArrayAdapter;
@@ -59,7 +59,13 @@ public class SendsSmsFragment extends Fragment implements View.OnClickListener {
 
         mProgressDialog = new ProgressDialog(getContext());
         showProgressDialog("Cargando contactos..");
-        getNumber(getActivity().getContentResolver());
+        if((NevigationActivity.rows == null) || (NevigationActivity.rows.size() < 1) ){
+            getNumber(getActivity().getContentResolver());
+        }else{
+            listView_contactos.setItemsCanFocus(true);
+            customArrayAdapter = new CustomArrayAdapter(getActivity(), NevigationActivity.rows);
+            listView_contactos.setAdapter(customArrayAdapter);
+        }
         dismissProgressDialog();
 
         return view;
@@ -107,15 +113,15 @@ public class SendsSmsFragment extends Fragment implements View.OnClickListener {
 
         }
         phones.close();// close cursor
-        rows.addAll(listItems.values());
-        Collections.sort(rows, new Comparator<RowContactsModel>() {
+        NevigationActivity.rows.addAll(listItems.values());
+        Collections.sort(NevigationActivity.rows, new Comparator<RowContactsModel>() {
             public int compare(RowContactsModel v1, RowContactsModel v2) {
                 return v1.getName().compareToIgnoreCase(v2.getName());
             }
         });
 
         listView_contactos.setItemsCanFocus(true);
-        customArrayAdapter = new CustomArrayAdapter(getActivity(), rows);
+        customArrayAdapter = new CustomArrayAdapter(getActivity(), NevigationActivity.rows);
         listView_contactos.setAdapter(customArrayAdapter);
 
 
@@ -166,8 +172,8 @@ public class SendsSmsFragment extends Fragment implements View.OnClickListener {
 
     private void selectAll() {
 
-        for (int i = 0; i < rows.size(); i++) {
-            rows.get(i).setChecked(true);
+        for (int i = 0; i < NevigationActivity.rows.size(); i++) {
+            NevigationActivity.rows.get(i).setChecked(true);
         }
         customArrayAdapter.notifyDataSetChanged();
 
@@ -176,8 +182,8 @@ public class SendsSmsFragment extends Fragment implements View.OnClickListener {
 
     private void unSelectAll() {
 
-        for (int i = 0; i < rows.size(); i++) {
-            rows.get(i).setChecked(false);
+        for (int i = 0; i < NevigationActivity.rows.size(); i++) {
+            NevigationActivity.rows.get(i).setChecked(false);
         }
         customArrayAdapter.notifyDataSetChanged();
     }
@@ -187,14 +193,16 @@ public class SendsSmsFragment extends Fragment implements View.OnClickListener {
         FragmentManager fragmentManager;
         FragmentTransaction fragmentTransaction;
         int count = 0;
-        for (int i = 0; i < rows.size(); i++) {
-            if (rows.get(i).isChecked()) {
+        for (int i = 0; i < NevigationActivity.rows.size(); i++) {
+            if (NevigationActivity.rows.get(i).isChecked()) {
                 count++;
             }
         }
 
         if (count >= 0) {
             fragmentManager = getActivity().getSupportFragmentManager();
+            Bundle data = new Bundle();
+
             fragmentTransaction = fragmentManager.beginTransaction();
             ConfirmarSmsFragment confirmarSmsFragment = new ConfirmarSmsFragment();
             fragmentTransaction.replace(R.id.fragment, confirmarSmsFragment);

@@ -7,11 +7,19 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.appcontactos.javierdiaz.jeunessemiami.R;
+import com.appcontactos.javierdiaz.jeunessemiami.activities.NevigationActivity;
+import com.appcontactos.javierdiaz.jeunessemiami.modelos.RowContactsModel;
+
+import java.util.ArrayList;
 
 
 public class ConfirmarSmsFragment extends Fragment {
+
+    private ArrayList<RowContactsModel> seleccionados = new ArrayList<>();
+    private TextView txtview_num_seleccionados;
 
     public ConfirmarSmsFragment() {
         // Required empty public constructor
@@ -26,8 +34,10 @@ public class ConfirmarSmsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_confirmar_sms, container, false);
+        View view = inflater.inflate(R.layout.fragment_confirmar_sms, container, false);
+        txtview_num_seleccionados = (TextView) view.findViewById(R.id.textview_num_selected);
+        mostrarSelecionados(txtview_num_seleccionados);
+        return view;
     }
 
 
@@ -39,6 +49,15 @@ public class ConfirmarSmsFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
+    }
+
+    private void mostrarSelecionados(TextView txtarea){
+        for(int i =0; i < NevigationActivity.rows.size(); i++){
+            if(NevigationActivity.rows.get(i).isChecked()){
+                txtarea.append(NevigationActivity.rows.get(i).getName()+" " +NevigationActivity.rows.get(i).getMobile_number()+"\n");
+
+            }
+        }
     }
 
 }

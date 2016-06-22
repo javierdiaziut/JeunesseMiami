@@ -27,6 +27,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.appcontactos.javierdiaz.jeunessemiami.R;
 import com.appcontactos.javierdiaz.jeunessemiami.activities.LoginActivity;
+import com.appcontactos.javierdiaz.jeunessemiami.activities.NevigationActivity;
 import com.appcontactos.javierdiaz.jeunessemiami.adaptadores.CustomArrayAdapter;
 import com.appcontactos.javierdiaz.jeunessemiami.modelos.RowContactsModel;
 import com.appcontactos.javierdiaz.jeunessemiami.util.Config;
@@ -43,7 +44,6 @@ public class SincronizarFragment extends Fragment implements View.OnClickListene
 
     private String phoneNumber;
     private ListView listView_contactos;
-    private ArrayList<RowContactsModel> rows = new ArrayList<>();
     private HashMap<Double, RowContactsModel> listItems;
     private Button btnSincronizar;
     private CustomArrayAdapter customArrayAdapter;
@@ -77,15 +77,26 @@ public class SincronizarFragment extends Fragment implements View.OnClickListene
         checkBoxTodos = (CheckBox) view.findViewById(R.id.checkBox_todos);
         mProgressDialog = new ProgressDialog(getContext());
         showProgressDialog("Cargando contactos..");
-        getNumber(getActivity().getContentResolver());
+
+        if((NevigationActivity.rows == null) || (NevigationActivity.rows.size() < 1) ){
+            getNumber(getActivity().getContentResolver());
+        }else{
+            listView_contactos.setItemsCanFocus(true);
+            customArrayAdapter = new CustomArrayAdapter(getActivity(), NevigationActivity.rows);
+            listView_contactos.setAdapter(customArrayAdapter);
+        }
+
+
         dismissProgressDialog();
         checkBoxTodos.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(isChecked){
-                    Toast.makeText(getActivity(),"Todos seleccionados", Toast.LENGTH_SHORT).show();
+                    selectAll();
+
                 }else{
-                    Toast.makeText(getActivity(),"Todos deseleccionados", Toast.LENGTH_SHORT).show();
+                    unSelectAll();
+
                 }
 
 
@@ -137,15 +148,15 @@ public class SincronizarFragment extends Fragment implements View.OnClickListene
 
         }
         phones.close();// close cursor
-        rows.addAll(listItems.values());
-        Collections.sort(rows, new Comparator<RowContactsModel>() {
+        NevigationActivity.rows.addAll(listItems.values());
+        Collections.sort(NevigationActivity.rows, new Comparator<RowContactsModel>() {
             public int compare(RowContactsModel v1, RowContactsModel v2) {
                 return v1.getName().compareToIgnoreCase(v2.getName());
             }
         });
 
         listView_contactos.setItemsCanFocus(true);
-        customArrayAdapter = new CustomArrayAdapter(getActivity(), rows);
+        customArrayAdapter = new CustomArrayAdapter(getActivity(), NevigationActivity.rows);
         listView_contactos.setAdapter(customArrayAdapter);
 
 
@@ -196,8 +207,8 @@ public class SincronizarFragment extends Fragment implements View.OnClickListene
 
     private void selectAll() {
 
-        for (int i = 0; i < rows.size(); i++) {
-            rows.get(i).setChecked(true);
+        for (int i = 0; i < NevigationActivity.rows.size(); i++) {
+            NevigationActivity.rows.get(i).setChecked(true);
         }
         customArrayAdapter.notifyDataSetChanged();
 
@@ -206,8 +217,8 @@ public class SincronizarFragment extends Fragment implements View.OnClickListene
 
     private void unSelectAll() {
 
-        for (int i = 0; i < rows.size(); i++) {
-            rows.get(i).setChecked(false);
+        for (int i = 0; i < NevigationActivity.rows.size(); i++) {
+            NevigationActivity.rows.get(i).setChecked(false);
         }
         customArrayAdapter.notifyDataSetChanged();
     }
@@ -280,18 +291,18 @@ public class SincronizarFragment extends Fragment implements View.OnClickListene
         switch (v.getId()) {
             case R.id.btn_sincronizar:
                 int count = 0;
-                for (int i = 0; i < rows.size(); i++) {
-                    if (rows.get(i).isChecked()) {
+                for (int i = 0; i < NevigationActivity.rows.size(); i++) {
+                    if (NevigationActivity.rows.get(i).isChecked()) {
                         count++;
                     }
                 }
 
                 if (count > 0) {
                     showProgressDialog(getString(R.string.sincronizar_contactos));
-                    for (int i = 0; i < rows.size(); i++) {
-                        if (rows.get(i).isChecked()) {
-                            synContacto(getActivity(), rows.get(i).getUserid(), rows.get(i).getName(),
-                                    rows.get(i).getSurname(), rows.get(i).getEmail(), rows.get(i).getMobile_number());
+                    for (int i = 0; i < NevigationActivity.rows.size(); i++) {
+                        if (NevigationActivity.rows.get(i).isChecked()) {
+                            synContacto(getActivity(), NevigationActivity.rows.get(i).getUserid(), NevigationActivity.rows.get(i).getName(),
+                                    NevigationActivity.rows.get(i).getSurname(), NevigationActivity.rows.get(i).getEmail(), NevigationActivity.rows.get(i).getMobile_number());
                             pendingRequests++;
                         }
                     }

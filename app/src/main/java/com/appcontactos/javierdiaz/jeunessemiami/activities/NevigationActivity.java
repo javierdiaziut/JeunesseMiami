@@ -19,12 +19,17 @@ import com.appcontactos.javierdiaz.jeunessemiami.MainActivity;
 import com.appcontactos.javierdiaz.jeunessemiami.R;
 import com.appcontactos.javierdiaz.jeunessemiami.fragments.SendsSmsFragment;
 import com.appcontactos.javierdiaz.jeunessemiami.fragments.SincronizarFragment;
+import com.appcontactos.javierdiaz.jeunessemiami.modelos.RowContactsModel;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import java.util.ArrayList;
+
 public class NevigationActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    public static ArrayList<RowContactsModel> rows = new ArrayList<>();
 
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
