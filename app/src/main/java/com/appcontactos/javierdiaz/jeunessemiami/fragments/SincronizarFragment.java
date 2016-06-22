@@ -13,6 +13,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -45,9 +47,8 @@ public class SincronizarFragment extends Fragment implements View.OnClickListene
     private HashMap<Double, RowContactsModel> listItems;
     private Button btnSincronizar;
     private CustomArrayAdapter customArrayAdapter;
-    private Button btn_selecc_all;
-    private Button btn_unselecc_all;
     private int pendingRequests = 0;
+    private CheckBox checkBoxTodos;
     /**
      * activity progress dialog
      */
@@ -71,24 +72,28 @@ public class SincronizarFragment extends Fragment implements View.OnClickListene
         View view = inflater.inflate(R.layout.fragment_sincronizar, container, false);
         listView_contactos = (ListView) view.findViewById(R.id.listview_contactos);
         btnSincronizar = (Button) view.findViewById(R.id.btn_sincronizar);
-        btn_selecc_all = (Button) view.findViewById(R.id.btn_selecctodos);
-        btn_unselecc_all = (Button) view.findViewById(R.id.btn_deselecctodos);
         btnSincronizar.setOnClickListener(this);
-        btn_selecc_all.setOnClickListener(this);
-        btn_unselecc_all.setOnClickListener(this);
         listItems = new HashMap<>();
-
+        checkBoxTodos = (CheckBox) view.findViewById(R.id.checkBox_todos);
         mProgressDialog = new ProgressDialog(getContext());
         showProgressDialog("Cargando contactos..");
         getNumber(getActivity().getContentResolver());
         dismissProgressDialog();
+        checkBoxTodos.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    Toast.makeText(getActivity(),"Todos seleccionados", Toast.LENGTH_SHORT).show();
+                }else{
+                    Toast.makeText(getActivity(),"Todos deseleccionados", Toast.LENGTH_SHORT).show();
+                }
+
+
+            }
+        });
         return view;
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-
-    }
 
     @Override
     public void onAttach(Context context) {
@@ -295,12 +300,7 @@ public class SincronizarFragment extends Fragment implements View.OnClickListene
                     Toast.makeText(getActivity(), "Debe seleccionar al menos un(1) contacto", Toast.LENGTH_LONG).show();
                 }
                 break;
-            case R.id.btn_selecctodos:
-                selectAll();
-                break;
-            case R.id.btn_deselecctodos:
-                unSelectAll();
-                break;
+
         }
     }
 }

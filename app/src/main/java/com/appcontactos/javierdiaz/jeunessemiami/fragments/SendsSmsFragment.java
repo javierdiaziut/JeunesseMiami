@@ -8,12 +8,15 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.appcontactos.javierdiaz.jeunessemiami.R;
 import com.appcontactos.javierdiaz.jeunessemiami.adaptadores.CustomArrayAdapter;
@@ -25,7 +28,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 
 
-public class SendsSmsFragment extends Fragment implements View.OnClickListener{
+public class SendsSmsFragment extends Fragment implements View.OnClickListener {
     private String phoneNumber;
     private ListView listView_contactos;
     private ArrayList<RowContactsModel> rows = new ArrayList<>();
@@ -181,6 +184,24 @@ public class SendsSmsFragment extends Fragment implements View.OnClickListener{
 
     @Override
     public void onClick(View v) {
+        FragmentManager fragmentManager;
+        FragmentTransaction fragmentTransaction;
+        int count = 0;
+        for (int i = 0; i < rows.size(); i++) {
+            if (rows.get(i).isChecked()) {
+                count++;
+            }
+        }
 
+        if (count >= 0) {
+            fragmentManager = getActivity().getSupportFragmentManager();
+            fragmentTransaction = fragmentManager.beginTransaction();
+            ConfirmarSmsFragment confirmarSmsFragment = new ConfirmarSmsFragment();
+            fragmentTransaction.replace(R.id.fragment, confirmarSmsFragment);
+            fragmentTransaction.commit();
+
+        }else{
+            Toast.makeText(getActivity(), "Debe seleccionar al menos un(1) contacto", Toast.LENGTH_LONG).show();
+        }
     }
 }
