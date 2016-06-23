@@ -120,7 +120,7 @@ public class LoginActivity extends AppCompatActivity {
                    } catch (JSONException e) {
                        e.printStackTrace();
                    }
-                   Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                   Intent intent = new Intent(LoginActivity.this, NavigationActivity.class);
                    startActivity(intent);
                    txtUser.setText("");
                    txtPass.setText("");

@@ -4,12 +4,13 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_sincronizar"
-            android:icon="@drawable/ic_menu_camera"
+
             android:title="Sincronizar" />
         <item
             android:id="@+id/nav_enviarsms"
-            android:icon="@drawable/ic_menu_gallery"
+
             android:title="Enviar SMS" />
+
 
         <item
             android:id="@+id/nav_logout"

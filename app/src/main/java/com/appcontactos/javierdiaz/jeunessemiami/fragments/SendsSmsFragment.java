@@ -4,7 +4,6 @@ import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
@@ -19,11 +18,10 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.appcontactos.javierdiaz.jeunessemiami.R;
-import com.appcontactos.javierdiaz.jeunessemiami.activities.NevigationActivity;
+import com.appcontactos.javierdiaz.jeunessemiami.activities.NavigationActivity;
 import com.appcontactos.javierdiaz.jeunessemiami.adaptadores.CustomArrayAdapter;
 import com.appcontactos.javierdiaz.jeunessemiami.modelos.RowContactsModel;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -59,11 +57,11 @@ public class SendsSmsFragment extends Fragment implements View.OnClickListener {
 
         mProgressDialog = new ProgressDialog(getContext());
         showProgressDialog("Cargando contactos..");
-        if((NevigationActivity.rows == null) || (NevigationActivity.rows.size() < 1) ){
+        if((NavigationActivity.rows == null) || (NavigationActivity.rows.size() < 1) ){
             getNumber(getActivity().getContentResolver());
         }else{
             listView_contactos.setItemsCanFocus(true);
-            customArrayAdapter = new CustomArrayAdapter(getActivity(), NevigationActivity.rows);
+            customArrayAdapter = new CustomArrayAdapter(getActivity(), NavigationActivity.rows);
             listView_contactos.setAdapter(customArrayAdapter);
         }
         dismissProgressDialog();
@@ -113,15 +111,15 @@ public class SendsSmsFragment extends Fragment implements View.OnClickListener {
 
         }
         phones.close();// close cursor
-        NevigationActivity.rows.addAll(listItems.values());
-        Collections.sort(NevigationActivity.rows, new Comparator<RowContactsModel>() {
+        NavigationActivity.rows.addAll(listItems.values());
+        Collections.sort(NavigationActivity.rows, new Comparator<RowContactsModel>() {
             public int compare(RowContactsModel v1, RowContactsModel v2) {
                 return v1.getName().compareToIgnoreCase(v2.getName());
             }
         });
 
         listView_contactos.setItemsCanFocus(true);
-        customArrayAdapter = new CustomArrayAdapter(getActivity(), NevigationActivity.rows);
+        customArrayAdapter = new CustomArrayAdapter(getActivity(), NavigationActivity.rows);
         listView_contactos.setAdapter(customArrayAdapter);
 
 
@@ -172,8 +170,8 @@ public class SendsSmsFragment extends Fragment implements View.OnClickListener {
 
     private void selectAll() {
 
-        for (int i = 0; i < NevigationActivity.rows.size(); i++) {
-            NevigationActivity.rows.get(i).setChecked(true);
+        for (int i = 0; i < NavigationActivity.rows.size(); i++) {
+            NavigationActivity.rows.get(i).setChecked(true);
         }
         customArrayAdapter.notifyDataSetChanged();
 
@@ -182,8 +180,8 @@ public class SendsSmsFragment extends Fragment implements View.OnClickListener {
 
     private void unSelectAll() {
 
-        for (int i = 0; i < NevigationActivity.rows.size(); i++) {
-            NevigationActivity.rows.get(i).setChecked(false);
+        for (int i = 0; i < NavigationActivity.rows.size(); i++) {
+            NavigationActivity.rows.get(i).setChecked(false);
         }
         customArrayAdapter.notifyDataSetChanged();
     }
@@ -193,8 +191,8 @@ public class SendsSmsFragment extends Fragment implements View.OnClickListener {
         FragmentManager fragmentManager;
         FragmentTransaction fragmentTransaction;
         int count = 0;
-        for (int i = 0; i < NevigationActivity.rows.size(); i++) {
-            if (NevigationActivity.rows.get(i).isChecked()) {
+        for (int i = 0; i < NavigationActivity.rows.size(); i++) {
+            if (NavigationActivity.rows.get(i).isChecked()) {
                 count++;
             }
         }
