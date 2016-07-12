@@ -19,25 +19,17 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.appcontactos.javierdiaz.jeunessemiami.MainActivity;
 import com.appcontactos.javierdiaz.jeunessemiami.R;
 import com.appcontactos.javierdiaz.jeunessemiami.util.ApplicationController;
 import com.appcontactos.javierdiaz.jeunessemiami.util.Config;
 import com.appcontactos.javierdiaz.jeunessemiami.util.JsonObjectRequestUtil;
-import com.loopj.android.http.AsyncHttpClient;
-import com.loopj.android.http.AsyncHttpResponseHandler;
-import com.loopj.android.http.RequestParams;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import cz.msebera.android.httpclient.Header;
 import cz.msebera.android.httpclient.HttpStatus;
 
 public class LoginActivity extends AppCompatActivity {
@@ -75,10 +67,10 @@ public class LoginActivity extends AppCompatActivity {
                             requestPermissions(permissionsNeeded.toArray(new String[permissionsNeeded.size()]),
                                     PERMISSIONS_REQUEST);
                         } else {
-                            testLogin(txtUser.getText().toString(),txtPass.getText().toString());
+                            doLogin(txtUser.getText().toString(),txtPass.getText().toString());
                         }
                     } else {
-                        testLogin(txtUser.getText().toString(),txtPass.getText().toString());
+                        doLogin(txtUser.getText().toString(),txtPass.getText().toString());
 
                     }
 
@@ -101,7 +93,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
 
-   private void testLogin(String user, String pass){
+   private void doLogin(String user, String pass){
        userid = "";
        showProgressDialog(getString(R.string.cargando));
        String url = String

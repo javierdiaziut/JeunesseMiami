@@ -96,6 +96,7 @@ public class ConfirmarSmsFragment extends Fragment implements View.OnClickListen
 
     public void sendSMS(ArrayList<String> phoneNo, String msg) {
         try {
+
             SmsManager smsManager = SmsManager.getDefault();
             for (int i = 0; i < phoneNo.size(); i++) {
                 smsManager.sendTextMessage(phoneNo.get(i), null, msg, null, null);
@@ -109,4 +110,5 @@ public class ConfirmarSmsFragment extends Fragment implements View.OnClickListen
             ex.printStackTrace();
         }
     }
+
 }

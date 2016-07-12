@@ -8,7 +8,7 @@
     <string name="gracias_por_su_visita">Gracias por su visita</string>
     <string name="seleccionar_todos">Seleccionar todos</string>
     <string name="deseleccionar_todos">Deseleccionar todos</string>
-    <string name="title_activity_nevigation">NevigationActivity</string>
+    <string name="title_activity_nevigation">NavigationActivity</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>

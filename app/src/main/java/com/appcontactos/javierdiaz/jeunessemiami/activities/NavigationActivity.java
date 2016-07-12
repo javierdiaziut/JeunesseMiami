@@ -24,7 +24,6 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
-import com.appcontactos.javierdiaz.jeunessemiami.MainActivity;
 import com.appcontactos.javierdiaz.jeunessemiami.R;
 import com.appcontactos.javierdiaz.jeunessemiami.fragments.PlantillasFragment;
 import com.appcontactos.javierdiaz.jeunessemiami.fragments.SendsSmsFragment;
@@ -37,6 +36,8 @@ import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -240,7 +241,7 @@ public class NavigationActivity extends AppCompatActivity
             mProgressDialog.setMessage(message);
             mProgressDialog.show();
         } else {
-            Log.e("MainActivity.class", "Error al mostrar el Progress Dialog");
+            Log.e("NavigationAct.class", "Error al mostrar el Progress Dialog");
         }
     }
 
@@ -253,8 +254,55 @@ public class NavigationActivity extends AppCompatActivity
                 mProgressDialog.dismiss();
             }
         } else {
-            Log.e("MainActivity.class", "Error al mostrar el Progress Dialog");
+            Log.e("NavigationAct.class", "Error al mostrar el Progress Dialog");
         }
+    }
+
+    private void getMessages(){
+
+        showProgressDialog(getString(R.string.cargando));
+        String url = Config.url_mensaje;
+
+        Response.Listener<JSONObject> responseListener = new Response.Listener<JSONObject>() {
+
+            @Override
+            public void onResponse(JSONObject response) {
+                dismissProgressDialog();
+                JSONArray jsonArray = new JSONArray();
+                if(response.has("mensajes")){
+                    try {
+                        jsonArray = response.getJSONArray("mensaje");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                }else{
+                    Toast.makeText(getApplicationContext(), "Error al traer los mensajes",Toast.LENGTH_LONG).show();
+                }
+
+            }
+        };
+
+
+        Response.ErrorListener errorListener = new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                dismissProgressDialog();
+                Toast.makeText(getApplicationContext(), getString(R.string.error_servicios),Toast.LENGTH_LONG).show();
+                NetworkResponse networkResponse = error.networkResponse;
+                if (networkResponse != null && networkResponse.statusCode == HttpStatus.SC_UNAUTHORIZED) {
+                    VolleyLog.e("Error: ", networkResponse.statusCode);
+                }
+                VolleyLog.e("Error: ", error.getMessage());
+
+            }
+        };
+
+        JsonObjectRequestUtil jsonObjectRequest = new JsonObjectRequestUtil(Request.Method.POST, url, null, responseListener, errorListener);
+        jsonObjectRequest.setShouldCache(false);
+        ApplicationController.getInstance(this).addToRequestQueue(jsonObjectRequest);
+
     }
 
 }

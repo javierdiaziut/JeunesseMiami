@@ -19,5 +19,8 @@ public class Config {
     //Endpoint para hacer logout
     public static String metodo_logout = "method=logout&";
 
+    //Endpoint para traer los mensajes
+    public static String url_mensaje ="http://104.131.98.76/api-lp/cliente_sms.php";
+
 
 }
