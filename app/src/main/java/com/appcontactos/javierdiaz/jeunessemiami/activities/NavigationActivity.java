@@ -26,6 +26,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.appcontactos.javierdiaz.jeunessemiami.MainActivity;
 import com.appcontactos.javierdiaz.jeunessemiami.R;
+import com.appcontactos.javierdiaz.jeunessemiami.fragments.PlantillasFragment;
 import com.appcontactos.javierdiaz.jeunessemiami.fragments.SendsSmsFragment;
 import com.appcontactos.javierdiaz.jeunessemiami.fragments.SincronizarFragment;
 import com.appcontactos.javierdiaz.jeunessemiami.modelos.RowContactsModel;
@@ -122,13 +123,15 @@ public class NavigationActivity extends AppCompatActivity
             case R.id.nav_enviarsms:
                 setFragment(1);
                 break;
+            case R.id.nav_plantillas:
+                setFragment(2);
+                break;
             case R.id.nav_logout:
                 new AlertDialog.Builder(this)
                         .setIcon(android.R.drawable.ic_dialog_alert)
                         .setTitle("Logut")
                         .setMessage("Desea salir de la aplicación?")
-                        .setPositiveButton("Si", new DialogInterface.OnClickListener()
-                        {
+                        .setPositiveButton("Si", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 logout(LoginActivity.userid);
@@ -149,7 +152,6 @@ public class NavigationActivity extends AppCompatActivity
     }
 
 
-
     public void setFragment(int position) {
         FragmentManager fragmentManager;
         FragmentTransaction fragmentTransaction;
@@ -168,6 +170,13 @@ public class NavigationActivity extends AppCompatActivity
                 fragmentTransaction.replace(R.id.fragment, sendsSmsFragment);
                 fragmentTransaction.commit();
                 break;
+            case 2:
+                fragmentManager = getSupportFragmentManager();
+                fragmentTransaction = fragmentManager.beginTransaction();
+                PlantillasFragment plantillasFragment = new PlantillasFragment();
+                fragmentTransaction.replace(R.id.fragment, plantillasFragment);
+                fragmentTransaction.commit();
+                break;
         }
     }
 
@@ -182,18 +191,19 @@ public class NavigationActivity extends AppCompatActivity
         super.onStop();
 
     }
-    private void logout(String iduser){
+
+    private void logout(String iduser) {
         showProgressDialog(getString(R.string.cargando));
 
         String url = String
-                .format(Config.url+ Config.metodo_logout+"user_id=%s",
+                .format(Config.url + Config.metodo_logout + "user_id=%s",
                         iduser);
         Response.Listener<JSONObject> responseListener = new Response.Listener<JSONObject>() {
 
             @Override
             public void onResponse(JSONObject response) {
                 dismissProgressDialog();
-                Toast.makeText(getApplicationContext(), getString(R.string.gracias_por_su_visita),Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), getString(R.string.gracias_por_su_visita), Toast.LENGTH_LONG).show();
                 finish();
             }
         };
@@ -204,7 +214,7 @@ public class NavigationActivity extends AppCompatActivity
             @Override
             public void onErrorResponse(VolleyError error) {
                 dismissProgressDialog();
-                Toast.makeText(getApplicationContext(), getString(R.string.error_servicios),Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), getString(R.string.error_servicios), Toast.LENGTH_LONG).show();
                 NetworkResponse networkResponse = error.networkResponse;
                 if (networkResponse != null && networkResponse.statusCode == HttpStatus.SC_UNAUTHORIZED) {
                     VolleyLog.e("Error: ", networkResponse.statusCode);
