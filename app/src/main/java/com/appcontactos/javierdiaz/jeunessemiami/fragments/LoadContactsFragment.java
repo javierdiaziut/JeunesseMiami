@@ -27,7 +27,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 
 
-public class SendsSmsFragment extends Fragment implements View.OnClickListener {
+public class LoadContactsFragment extends Fragment implements View.OnClickListener {
     private String phoneNumber;
     private ListView listView_contactos;
     private HashMap<Double, RowContactsModel> listItems;
@@ -35,7 +35,7 @@ public class SendsSmsFragment extends Fragment implements View.OnClickListener {
     private CustomArrayAdapter customArrayAdapter;
     protected ProgressDialog mProgressDialog;
 
-    public SendsSmsFragment() {
+    public LoadContactsFragment() {
         // Required empty public constructor
     }
 
@@ -199,12 +199,20 @@ public class SendsSmsFragment extends Fragment implements View.OnClickListener {
 
         if (count >= 0) {
             fragmentManager = getActivity().getSupportFragmentManager();
-            Bundle data = new Bundle();
-
             fragmentTransaction = fragmentManager.beginTransaction();
-            ConfirmarSmsFragment confirmarSmsFragment = new ConfirmarSmsFragment();
-            fragmentTransaction.replace(R.id.fragment, confirmarSmsFragment);
-            fragmentTransaction.commit();
+
+            switch (NavigationActivity.NEXT_FRAGMENT){
+                case NavigationActivity.FRAGMENT_MSG:
+                    ConfirmarSmsFragment confirmarSmsFragment = new ConfirmarSmsFragment();
+                    fragmentTransaction.replace(R.id.fragment, confirmarSmsFragment);
+                    fragmentTransaction.commit();
+                    break;
+                case NavigationActivity.FRAGMENT_PLANTILLAS:
+                    PlantillasFragment plantillasFragment = new PlantillasFragment();
+                    fragmentTransaction.replace(R.id.fragment, plantillasFragment);
+                    fragmentTransaction.commit();
+                    break;
+            }
 
         }else{
             Toast.makeText(getActivity(), "Debe seleccionar al menos un(1) contacto", Toast.LENGTH_LONG).show();

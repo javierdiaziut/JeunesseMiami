@@ -2,8 +2,6 @@ package com.appcontactos.javierdiaz.jeunessemiami.activities;
 
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentManager;
@@ -18,7 +16,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
-
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -26,34 +23,31 @@ import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.appcontactos.javierdiaz.jeunessemiami.R;
 import com.appcontactos.javierdiaz.jeunessemiami.fragments.PlantillasFragment;
-import com.appcontactos.javierdiaz.jeunessemiami.fragments.SendsSmsFragment;
+import com.appcontactos.javierdiaz.jeunessemiami.fragments.LoadContactsFragment;
 import com.appcontactos.javierdiaz.jeunessemiami.fragments.SincronizarFragment;
+import com.appcontactos.javierdiaz.jeunessemiami.modelos.Mensajes;
 import com.appcontactos.javierdiaz.jeunessemiami.modelos.RowContactsModel;
 import com.appcontactos.javierdiaz.jeunessemiami.util.ApplicationController;
 import com.appcontactos.javierdiaz.jeunessemiami.util.Config;
 import com.appcontactos.javierdiaz.jeunessemiami.util.JsonObjectRequestUtil;
-import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.util.ArrayList;
-
 import cz.msebera.android.httpclient.HttpStatus;
 
 public class NavigationActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     public static ArrayList<RowContactsModel> rows = new ArrayList<>();
+    public static ArrayList<Mensajes> plantillasMensajes= new ArrayList<>();
+    public static String NEXT_FRAGMENT ="";
+    public static final String FRAGMENT_MSG = "FRAGMENT_MENSAJES";
+    public static final String FRAGMENT_PLANTILLAS = "FRAGMENT_PLANTILLAS";
     protected ProgressDialog mProgressDialog;
-
-    /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
-     */
     private GoogleApiClient client;
 
     @Override
@@ -73,7 +67,7 @@ public class NavigationActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
+        getMessages();
         setFragment(0);
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -167,16 +161,18 @@ public class NavigationActivity extends AppCompatActivity
             case 1:
                 fragmentManager = getSupportFragmentManager();
                 fragmentTransaction = fragmentManager.beginTransaction();
-                SendsSmsFragment sendsSmsFragment = new SendsSmsFragment();
-                fragmentTransaction.replace(R.id.fragment, sendsSmsFragment);
+                LoadContactsFragment loadContactsFragment = new LoadContactsFragment();
+                fragmentTransaction.replace(R.id.fragment, loadContactsFragment);
                 fragmentTransaction.commit();
+                NEXT_FRAGMENT = FRAGMENT_MSG;
                 break;
             case 2:
                 fragmentManager = getSupportFragmentManager();
                 fragmentTransaction = fragmentManager.beginTransaction();
-                PlantillasFragment plantillasFragment = new PlantillasFragment();
-                fragmentTransaction.replace(R.id.fragment, plantillasFragment);
+                LoadContactsFragment loadContactsFragment2 = new LoadContactsFragment();
+                fragmentTransaction.replace(R.id.fragment, loadContactsFragment2);
                 fragmentTransaction.commit();
+                NEXT_FRAGMENT = FRAGMENT_PLANTILLAS;
                 break;
         }
     }
@@ -271,7 +267,15 @@ public class NavigationActivity extends AppCompatActivity
                 JSONArray jsonArray = new JSONArray();
                 if(response.has("mensajes")){
                     try {
-                        jsonArray = response.getJSONArray("mensaje");
+                        jsonArray = response.getJSONArray("mensajes");
+
+                        for(int i =0; i < jsonArray.length();i ++){
+                            JSONObject jsonObject = new JSONObject();
+                            jsonObject = jsonArray.getJSONObject(i);
+                            plantillasMensajes.add(new Mensajes(jsonObject.getInt("id"),jsonObject.getInt("tipo"),
+                                    jsonObject.getString("descripcion"),jsonObject.getString("fecha"),
+                                    jsonObject.getInt("valido"),jsonObject.getString("imagen"),jsonObject.getString("link_video")));
+                        }
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }

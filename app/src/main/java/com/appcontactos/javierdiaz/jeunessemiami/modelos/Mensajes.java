@@ -13,6 +13,16 @@ public class Mensajes {
     private String imagen;
     private String link_video;
 
+    public Mensajes(int id, int tipo, String descripcion, String fecha, int valido, String imagen, String link_video) {
+        this.id = id;
+        this.tipo = tipo;
+        this.descripcion = descripcion;
+        this.fecha = fecha;
+        this.valido = valido;
+        this.imagen = imagen;
+        this.link_video = link_video;
+    }
+
     public int getId() {
         return id;
     }
