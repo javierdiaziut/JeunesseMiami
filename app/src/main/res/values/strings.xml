@@ -13,7 +13,12 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="enviar_sms">Enviar SMS</string>
+    <string name="enviar">Enviar</string>
     <string name="action_settings">Settings</string>
+    <string name="siguiente">Siguiente</string>
+    <string name="mensaje">Mensaje</string>
+    <string name="imagen">Imagen</string>
+    <string name="link_video">Link video</string>
 
 
     <!-- TODO: Remove or change this placeholder text -->
