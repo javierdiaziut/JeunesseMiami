@@ -12,8 +12,9 @@ public class Mensajes {
     private int valido;
     private String imagen;
     private String link_video;
+    private boolean checked;
 
-    public Mensajes(int id, int tipo, String descripcion, String fecha, int valido, String imagen, String link_video) {
+    public Mensajes(int id, int tipo, String descripcion, String fecha, int valido, String imagen, String link_video, boolean checked) {
         this.id = id;
         this.tipo = tipo;
         this.descripcion = descripcion;
@@ -21,6 +22,7 @@ public class Mensajes {
         this.valido = valido;
         this.imagen = imagen;
         this.link_video = link_video;
+        this.checked = checked;
     }
 
     public int getId() {
@@ -78,6 +80,14 @@ public class Mensajes {
     public void setLink_video(String link_video) {
         this.link_video = link_video;
     }
+    public boolean isChecked() {
+        return checked;
+    }
+
+    public void setChecked(boolean checked) {
+        this.checked = checked;
+    }
+
 
 
 }

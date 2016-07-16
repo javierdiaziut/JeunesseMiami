@@ -100,6 +100,7 @@ public class SincronizarFragment extends Fragment implements View.OnClickListene
 
             }
         });
+
         return view;
     }
 

@@ -48,7 +48,7 @@ public class NavigationActivity extends AppCompatActivity
     public static final String FRAGMENT_MSG = "FRAGMENT_MENSAJES";
     public static final String FRAGMENT_PLANTILLAS = "FRAGMENT_PLANTILLAS";
     protected ProgressDialog mProgressDialog;
-    private GoogleApiClient client;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,9 +69,6 @@ public class NavigationActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         getMessages();
         setFragment(0);
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
     @Override
@@ -274,7 +271,7 @@ public class NavigationActivity extends AppCompatActivity
                             jsonObject = jsonArray.getJSONObject(i);
                             plantillasMensajes.add(new Mensajes(jsonObject.getInt("id"),jsonObject.getInt("tipo"),
                                     jsonObject.getString("descripcion"),jsonObject.getString("fecha"),
-                                    jsonObject.getInt("valido"),jsonObject.getString("imagen"),jsonObject.getString("link_video")));
+                                    jsonObject.getInt("valido"),jsonObject.getString("imagen"),jsonObject.getString("link_video"), false));
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();

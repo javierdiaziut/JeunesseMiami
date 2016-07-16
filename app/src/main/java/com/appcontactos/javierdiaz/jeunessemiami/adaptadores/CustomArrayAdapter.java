@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * Created by SinAsignarT1 on 31/05/2016.
+ * Created by Javier Diaz on 31/05/2016.
  */
 public class CustomArrayAdapter extends ArrayAdapter<RowContactsModel> {
 

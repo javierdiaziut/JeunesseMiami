@@ -17,6 +17,7 @@
     <string name="action_settings">Settings</string>
     <string name="siguiente">Siguiente</string>
     <string name="mensaje">Mensaje</string>
+    <string name="preview_msg">Preview</string>
     <string name="imagen">Imagen</string>
     <string name="link_video">Link video</string>
 
