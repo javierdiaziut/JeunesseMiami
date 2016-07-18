@@ -50,7 +50,6 @@
                         android:id="@+id/txtview_preview_msg"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Texto de pruba"
                         android:layout_marginLeft="10dp"
                         android:layout_marginTop="10dp"
                         android:textSize="14sp" />
@@ -72,10 +71,11 @@
                         android:layout_marginTop="10dp"
                         android:textSize="16sp"
                         android:textStyle="bold"/>
-                    <TextView
-                        android:id="@+id/textView_preview_img"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                    <ImageView
+                        android:id="@+id/imgView_preview_img"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:src="@mipmap/usuario"
                         android:layout_marginLeft="10dp"
                         android:layout_marginTop="10dp" />
                 </LinearLayout>
@@ -100,7 +100,6 @@
                         android:id="@+id/txtview_preview_vid"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Texto de pruba"
                         android:layout_marginLeft="10dp"
                         android:layout_marginTop="10dp"
                         android:textSize="14sp" />

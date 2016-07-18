@@ -20,6 +20,8 @@
     <string name="preview_msg">Preview</string>
     <string name="imagen">Imagen</string>
     <string name="link_video">Link video</string>
+    <string name="pick_image_intent_text">Seleccione una foto</string>
+
 
 
     <!-- TODO: Remove or change this placeholder text -->
