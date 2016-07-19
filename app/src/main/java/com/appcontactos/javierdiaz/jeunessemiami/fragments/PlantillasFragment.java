@@ -94,7 +94,7 @@ public class PlantillasFragment extends Fragment {
             public void onClick(View v) {
                 for (int i = 0; i < NavigationActivity.plantillasMensajes.size(); i++) {
                     if (NavigationActivity.plantillasMensajes.get(i).isChecked() &&
-                            (NavigationActivity.plantillasMensajes.get(i).getImagen() != null || !NavigationActivity.plantillasMensajes.get(i).getImagen().isEmpty())) {
+                            (NavigationActivity.plantillasMensajes.get(i).getImagen() != null && !NavigationActivity.plantillasMensajes.get(i).getImagen().isEmpty())) {
                         txtPreviewmsg.setText(NavigationActivity.plantillasMensajes.get(i).getDescripcion());
                         txtPreviewlinkvideo.setText(NavigationActivity.plantillasMensajes.get(i).getLink_video());
                         relativePreviewSMS.setVisibility(View.GONE);
@@ -103,10 +103,14 @@ public class PlantillasFragment extends Fragment {
 
                         break;
                     } else {
-                        editTextsms.setText(NavigationActivity.plantillasMensajes.get(i).getDescripcion());
-                        relativePreviewSMS.setVisibility(View.VISIBLE);
-                        relativePreviewMMS.setVisibility(View.GONE);
-                        isSMS = Boolean.TRUE;
+                        if (NavigationActivity.plantillasMensajes.get(i).isChecked()) {
+                            editTextsms.setText(NavigationActivity.plantillasMensajes.get(i).getDescripcion());
+                            relativePreviewSMS.setVisibility(View.VISIBLE);
+                            relativePreviewMMS.setVisibility(View.GONE);
+                            isSMS = Boolean.TRUE;
+                            break;
+                        }
+
                     }
                 }
             }

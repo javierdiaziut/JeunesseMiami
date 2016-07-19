@@ -81,7 +81,7 @@ public class CustomPlantillasAdapter extends ArrayAdapter<Mensajes> {
 
         Mensajes row =  getItem(position);
 
-        if (row.getImagen()!= null || row.getImagen()!= ""){
+        if (row.getImagen()!= null && row.getImagen().length() > 0){
             holder.getTextViewType().setText("MMS");
         }else{
             holder.getTextViewType().setText("SMS");
