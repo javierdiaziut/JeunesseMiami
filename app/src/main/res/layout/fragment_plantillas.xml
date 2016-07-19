@@ -31,89 +31,133 @@
                 android:background="@drawable/text_view_confirmacion_style"
                 android:minHeight="200dp">
 
-                <LinearLayout
-                    android:id="@+id/linear_preview_msg"
+                <RelativeLayout
+                    android:id="@+id/relative_preview_sms"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:layout_height="match_parent"
+                    android:visibility="gone">
 
-                    <TextView
-                        android:id="@+id/txtview_preview_msg_tag"
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:id="@+id/linear_preview_sms"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/mensaje"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginTop="10dp"
-                        android:textSize="16sp"
-                        android:textStyle="bold"/>
-                    <TextView
-                        android:id="@+id/txtview_preview_msg"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginTop="10dp"
-                        android:textSize="14sp" />
-                </LinearLayout>
+                        android:orientation="horizontal">
 
-                <LinearLayout
-                    android:id="@+id/linear_preview_img"
-                    android:layout_below="@+id/linear_preview_msg"
+                        <TextView
+                            android:id="@+id/txtview_preview_sms_tag"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginTop="10dp"
+                            android:text="@string/mensaje"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <EditText
+                            android:id="@+id/edittext_preview_msg"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginTop="10dp"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/relative_preview_mms"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:layout_height="match_parent"
+                    android:visibility="gone">
 
-                    <TextView
-                        android:id="@+id/txtview_preview_img_tag"
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:id="@+id/linear_preview_msg"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/imagen"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginTop="10dp"
-                        android:textSize="16sp"
-                        android:textStyle="bold"/>
-                    <ImageView
-                        android:id="@+id/imgView_preview_img"
-                        android:layout_width="100dp"
-                        android:layout_height="100dp"
-                        android:src="@mipmap/usuario"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginTop="10dp" />
-                </LinearLayout>
+                        android:orientation="horizontal">
 
-                <LinearLayout
-                    android:id="@+id/linear_preview_vid"
-                    android:layout_below="@+id/linear_preview_img"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                        <TextView
+                            android:id="@+id/txtview_preview_msg_tag"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginTop="10dp"
+                            android:text="@string/mensaje"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
 
-                    <TextView
-                        android:id="@+id/txtview_preview_vid_tag"
-                        android:layout_width="wrap_content"
+                        <TextView
+                            android:id="@+id/txtview_preview_msg"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginTop="10dp"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/linear_preview_img"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/link_video"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginTop="10dp"
-                        android:textSize="16sp"
-                        android:textStyle="bold"/>
-                    <TextView
-                        android:id="@+id/txtview_preview_vid"
-                        android:layout_width="wrap_content"
+                        android:layout_below="@+id/linear_preview_msg"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/txtview_preview_img_tag"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginTop="10dp"
+                            android:text="@string/imagen"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <ImageView
+                            android:id="@+id/imgView_preview_img"
+                            android:layout_width="100dp"
+                            android:layout_height="100dp"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginTop="10dp"
+                            android:src="@mipmap/usuario" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/linear_preview_vid"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginTop="10dp"
-                        android:textSize="14sp" />
-                </LinearLayout>
+                        android:layout_below="@+id/linear_preview_img"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/txtview_preview_vid_tag"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginTop="10dp"
+                            android:text="@string/link_video"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/txtview_preview_vid"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginTop="10dp"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+
+                </RelativeLayout>
 
                 <Button
                     android:id="@+id/btn_preview_msg"
                     android:layout_width="100dp"
                     android:layout_height="50dp"
                     android:layout_alignParentBottom="true"
-                    android:layout_marginRight="10dp"
+                    android:layout_alignParentEnd="true"
                     android:layout_marginBottom="10dp"
-                    android:text="@string/preview_msg"
-                    android:layout_alignParentEnd="true"/>
+                    android:layout_marginRight="10dp"
+                    android:text="@string/preview_msg" />
             </RelativeLayout>
 
 

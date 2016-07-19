@@ -17,14 +17,17 @@ import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -52,6 +55,10 @@ public class PlantillasFragment extends Fragment {
     private static final int REQUEST_A_PICTURE = 100;
     private Uri actualURIimg;
     private String actualPATHimg = "";
+    private RelativeLayout relativePreviewMMS, relativePreviewSMS;
+    private EditText editTextsms;
+    private boolean isSMS = Boolean.FALSE;
+    private ArrayList<String> numeros = new ArrayList<>();
 
 
     public PlantillasFragment() {
@@ -70,6 +77,9 @@ public class PlantillasFragment extends Fragment {
         txtPreviewmsg = (TextView) view.findViewById(R.id.txtview_preview_msg);
         txtPreviewlinkvideo = (TextView) view.findViewById(R.id.txtview_preview_vid);
         imgPreviewimg = (ImageView) view.findViewById(R.id.imgView_preview_img);
+        relativePreviewSMS = (RelativeLayout) view.findViewById(R.id.relative_preview_sms);
+        relativePreviewMMS = (RelativeLayout) view.findViewById(R.id.relative_preview_mms);
+        editTextsms = (EditText) view.findViewById(R.id.edittext_preview_msg);
 
 
         if (NavigationActivity.plantillasMensajes != null && NavigationActivity.plantillasMensajes.size() > 0) {
@@ -83,11 +93,20 @@ public class PlantillasFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 for (int i = 0; i < NavigationActivity.plantillasMensajes.size(); i++) {
-                    if (NavigationActivity.plantillasMensajes.get(i).isChecked()) {
+                    if (NavigationActivity.plantillasMensajes.get(i).isChecked() &&
+                            (NavigationActivity.plantillasMensajes.get(i).getImagen() != null || !NavigationActivity.plantillasMensajes.get(i).getImagen().isEmpty())) {
                         txtPreviewmsg.setText(NavigationActivity.plantillasMensajes.get(i).getDescripcion());
                         txtPreviewlinkvideo.setText(NavigationActivity.plantillasMensajes.get(i).getLink_video());
+                        relativePreviewSMS.setVisibility(View.GONE);
+                        relativePreviewMMS.setVisibility(View.VISIBLE);
+                        isSMS = Boolean.FALSE;
 
                         break;
+                    } else {
+                        editTextsms.setText(NavigationActivity.plantillasMensajes.get(i).getDescripcion());
+                        relativePreviewSMS.setVisibility(View.VISIBLE);
+                        relativePreviewMMS.setVisibility(View.GONE);
+                        isSMS = Boolean.TRUE;
                     }
                 }
             }
@@ -97,18 +116,24 @@ public class PlantillasFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 String mensaje = "";
+                String sms = "";
 
                 for (int i = 0; i < NavigationActivity.plantillasMensajes.size(); i++) {
                     if (NavigationActivity.plantillasMensajes.get(i).isChecked()) {
                         mensaje = NavigationActivity.plantillasMensajes.get(i).getDescripcion() + " Video_link: " + NavigationActivity.plantillasMensajes.get(i).getLink_video();
-
+                        sms = NavigationActivity.plantillasMensajes.get(i).getDescripcion();
                         break;
                     }
                 }
-                if(mensaje.isEmpty()){
+                if (mensaje.isEmpty()) {
                     Toast.makeText(getContext(), "Debe seleccionar una plantilla de mensaje", Toast.LENGTH_LONG).show();
-                }else {
-                    sendMMS(mensaje);
+                } else {
+
+                    if (isSMS) {
+                        sendSMS(sms);
+                    } else {
+                        sendMMS(mensaje);
+                    }
                 }
 
             }
@@ -189,6 +214,28 @@ public class PlantillasFragment extends Fragment {
         i.setType("image/png");
         startActivity(i);
 
+    }
+
+    private void sendSMS(String msg) {
+        for (int i = 0; i < NavigationActivity.rows.size(); i++) {
+            if (NavigationActivity.rows.get(i).isChecked()) {
+                numeros.add(NavigationActivity.rows.get(i).getMobile_number());
+            }
+        }
+
+        try {
+            SmsManager smsManager = SmsManager.getDefault();
+            for (int i = 0; i < numeros.size(); i++) {
+                smsManager.sendTextMessage(numeros.get(i), null, msg, null, null);
+            }
+
+            Toast.makeText(getActivity(), "Message Sent",
+                    Toast.LENGTH_LONG).show();
+        } catch (Exception ex) {
+            Toast.makeText(getActivity(), ex.getMessage().toString(),
+                    Toast.LENGTH_LONG).show();
+            ex.printStackTrace();
+        }
     }
 
     @Override
