@@ -16,8 +16,10 @@
             <ListView
                 android:id="@+id/listview_plantillas"
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
+                android:layout_height="150dp"
                 android:layout_margin="15dp"
+                android:scrollbars="horizontal"
+                android:scrollIndicators="right"
                 android:minHeight="10dp">
 
             </ListView>
@@ -160,15 +162,18 @@
                     android:text="@string/preview_msg" />
             </RelativeLayout>
 
-
+            <Button
+                android:id="@+id/btn_send_msg"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:ems="10"
+                android:layout_below="@+id/relative_preview"
+                android:text="@string/enviar" />
         </RelativeLayout>
+
     </ScrollView>
 
-    <Button
-        android:id="@+id/btn_send_msg"
-        android:layout_width="200dp"
-        android:layout_height="50dp"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:text="@string/enviar" />
+
 </RelativeLayout>

@@ -125,7 +125,7 @@ public class PlantillasFragment extends Fragment {
                 for (int i = 0; i < NavigationActivity.plantillasMensajes.size(); i++) {
                     if (NavigationActivity.plantillasMensajes.get(i).isChecked()) {
                         mensaje = NavigationActivity.plantillasMensajes.get(i).getDescripcion() + " Video_link: " + NavigationActivity.plantillasMensajes.get(i).getLink_video();
-                        sms = NavigationActivity.plantillasMensajes.get(i).getDescripcion();
+                        sms = editTextsms.getText().toString();
                         break;
                     }
                 }
