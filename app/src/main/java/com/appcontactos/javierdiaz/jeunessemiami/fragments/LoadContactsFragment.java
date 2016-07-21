@@ -205,11 +205,13 @@ public class LoadContactsFragment extends Fragment implements View.OnClickListen
                 case NavigationActivity.FRAGMENT_MSG:
                     ConfirmarSmsFragment confirmarSmsFragment = new ConfirmarSmsFragment();
                     fragmentTransaction.replace(R.id.fragment, confirmarSmsFragment);
+                    fragmentTransaction.addToBackStack("mensajes");
                     fragmentTransaction.commit();
                     break;
                 case NavigationActivity.FRAGMENT_PLANTILLAS:
                     PlantillasFragment plantillasFragment = new PlantillasFragment();
                     fragmentTransaction.replace(R.id.fragment, plantillasFragment);
+                    fragmentTransaction.addToBackStack("plantilas");
                     fragmentTransaction.commit();
                     break;
             }

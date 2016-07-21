@@ -74,10 +74,30 @@ public class NavigationActivity extends AppCompatActivity
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+
+            if(fm.getBackStackEntryCount() > 0){
+                fm.popBackStack();
+            }else{
+                new AlertDialog.Builder(this)
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setTitle("Logut")
+                        .setMessage("Desea salir de la aplicación?")
+                        .setPositiveButton("Si", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                logout(LoginActivity.userid);
+
+                            }
+
+                        })
+                        .setNegativeButton("No", null)
+                        .show();
+            }
+
         }
     }
 
@@ -153,6 +173,7 @@ public class NavigationActivity extends AppCompatActivity
                 fragmentTransaction = fragmentManager.beginTransaction();
                 SincronizarFragment inboxFragment = new SincronizarFragment();
                 fragmentTransaction.replace(R.id.fragment, inboxFragment);
+                fragmentTransaction.addToBackStack("homefragment");
                 fragmentTransaction.commit();
                 break;
             case 1:
@@ -168,6 +189,7 @@ public class NavigationActivity extends AppCompatActivity
                 fragmentTransaction = fragmentManager.beginTransaction();
                 LoadContactsFragment loadContactsFragment2 = new LoadContactsFragment();
                 fragmentTransaction.replace(R.id.fragment, loadContactsFragment2);
+                fragmentTransaction.addToBackStack("plantillas");
                 fragmentTransaction.commit();
                 NEXT_FRAGMENT = FRAGMENT_PLANTILLAS;
                 break;

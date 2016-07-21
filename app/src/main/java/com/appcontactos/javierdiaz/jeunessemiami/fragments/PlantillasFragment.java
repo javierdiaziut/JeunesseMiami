@@ -16,6 +16,8 @@ import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.telephony.SmsManager;
 import android.util.Log;
@@ -383,5 +385,14 @@ public class PlantillasFragment extends Fragment {
                 cursor.close();
         }
         return null;
+    }
+
+    @Override
+    public void onDetach() {
+
+        FragmentManager fragmentManager;
+        FragmentTransaction fragmentTransaction;
+        getFragmentManager().popBackStackImmediate();
+
     }
 }
