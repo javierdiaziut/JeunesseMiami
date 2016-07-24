@@ -48,6 +48,7 @@ public class NavigationActivity extends AppCompatActivity
     public static final String FRAGMENT_MSG = "FRAGMENT_MENSAJES";
     public static final String FRAGMENT_PLANTILLAS = "FRAGMENT_PLANTILLAS";
     protected ProgressDialog mProgressDialog;
+    public static boolean RETURN_HOME = Boolean.FALSE;
 
 
     @Override
@@ -74,13 +75,14 @@ public class NavigationActivity extends AppCompatActivity
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        android.app.FragmentManager fm = getFragmentManager();
 
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
 
-            if(fm.getBackStackEntryCount() > 0){
-                fm.popBackStack();
+            if(RETURN_HOME){
+                setFragment(0);
             }else{
                 new AlertDialog.Builder(this)
                         .setIcon(android.R.drawable.ic_dialog_alert)
@@ -169,6 +171,7 @@ public class NavigationActivity extends AppCompatActivity
         FragmentTransaction fragmentTransaction;
         switch (position) {
             case 0:
+                RETURN_HOME = Boolean.FALSE;
                 fragmentManager = getSupportFragmentManager();
                 fragmentTransaction = fragmentManager.beginTransaction();
                 SincronizarFragment inboxFragment = new SincronizarFragment();
@@ -180,7 +183,7 @@ public class NavigationActivity extends AppCompatActivity
                 fragmentManager = getSupportFragmentManager();
                 fragmentTransaction = fragmentManager.beginTransaction();
                 LoadContactsFragment loadContactsFragment = new LoadContactsFragment();
-                fragmentTransaction.replace(R.id.fragment, loadContactsFragment);
+                fragmentTransaction.add(R.id.fragment, loadContactsFragment);
                 fragmentTransaction.commit();
                 NEXT_FRAGMENT = FRAGMENT_MSG;
                 break;

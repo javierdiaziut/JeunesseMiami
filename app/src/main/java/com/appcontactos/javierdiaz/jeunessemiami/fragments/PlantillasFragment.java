@@ -83,6 +83,8 @@ public class PlantillasFragment extends Fragment {
         relativePreviewMMS = (RelativeLayout) view.findViewById(R.id.relative_preview_mms);
         editTextsms = (EditText) view.findViewById(R.id.edittext_preview_msg);
 
+        NavigationActivity.plantillasMensajes.get(0).setImagen(null);
+
 
         if (NavigationActivity.plantillasMensajes != null && NavigationActivity.plantillasMensajes.size() > 0) {
             listViewPlantillas.setItemsCanFocus(true);
@@ -389,10 +391,13 @@ public class PlantillasFragment extends Fragment {
 
     @Override
     public void onDetach() {
+        super.onDetach();
+        NavigationActivity.RETURN_HOME = Boolean.TRUE;
+    }
 
-        FragmentManager fragmentManager;
-        FragmentTransaction fragmentTransaction;
-        getFragmentManager().popBackStackImmediate();
-
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        NavigationActivity.RETURN_HOME = Boolean.TRUE;
     }
 }
