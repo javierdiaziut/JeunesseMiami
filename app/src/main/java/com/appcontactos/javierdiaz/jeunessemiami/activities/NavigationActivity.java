@@ -15,6 +15,8 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
@@ -49,7 +51,7 @@ public class NavigationActivity extends AppCompatActivity
     public static final String FRAGMENT_PLANTILLAS = "FRAGMENT_PLANTILLAS";
     protected ProgressDialog mProgressDialog;
     public static boolean RETURN_HOME = Boolean.FALSE;
-
+    private TextView txtemail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +69,11 @@ public class NavigationActivity extends AppCompatActivity
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        View header=navigationView.getHeaderView(0);
+        /*View view=navigationView.inflateHeaderView(R.layout.nav_header_main);*/
+
+        txtemail = (TextView)header.findViewById(R.id.textViewEmail);
+        txtemail.setText("Hola, "+ LoginActivity.nameuser);
         navigationView.setNavigationItemSelectedListener(this);
         getMessages();
         setFragment(0);
@@ -183,7 +190,7 @@ public class NavigationActivity extends AppCompatActivity
                 fragmentManager = getSupportFragmentManager();
                 fragmentTransaction = fragmentManager.beginTransaction();
                 LoadContactsFragment loadContactsFragment = new LoadContactsFragment();
-                fragmentTransaction.add(R.id.fragment, loadContactsFragment);
+                fragmentTransaction.replace(R.id.fragment, loadContactsFragment);
                 fragmentTransaction.commit();
                 NEXT_FRAGMENT = FRAGMENT_MSG;
                 break;

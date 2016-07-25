@@ -11,15 +11,23 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
+import android.os.Environment;
 import android.os.Parcelable;
 import android.provider.MediaStore;
+import android.support.v4.util.LruCache;
 import android.util.Log;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.Volley;
 import com.appcontactos.javierdiaz.jeunessemiami.R;
+import com.appcontactos.javierdiaz.jeunessemiami.fragments.PlantillasFragment;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +40,8 @@ public class Util {
     private static final String TEMP_IMAGE_NAME = "tempImage";
     private static final int DEFAULT_MIN_WIDTH_QUALITY = 400;
     public static int minWidthQuality = DEFAULT_MIN_WIDTH_QUALITY;
-
+    private  ImageLoader mImageLoader;
+    private  RequestQueue mRequestQueue;
 
     public static Intent getPickImageIntent(Context context) {
         Intent chooserIntent = null;
@@ -197,4 +206,99 @@ public class Util {
         String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "croppedImage", null);
         return Uri.parse(path);
     }
+
+    public static String saveToSdCard(Bitmap bitmap, String filename) {
+
+        String stored = null;
+
+        File sdcard = Environment.getExternalStorageDirectory();
+
+        File folder = new File(sdcard.getAbsoluteFile(), "");//the dot makes this directory hidden to the user
+        folder.mkdir();
+        File file = new File(folder.getAbsoluteFile(), filename);
+        if (file.exists())
+            return stored;
+
+        try {
+            FileOutputStream out = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+            out.flush();
+            out.close();
+            stored = "success";
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return stored;
+    }
+
+    public static File getImage(String imagename) {
+        Bitmap img = null;
+        File mediaImage = null;
+        try {
+            String root = Environment.getExternalStorageDirectory().getAbsolutePath().toString();
+            File myDir = new File(root);
+            if (!myDir.exists())
+                return null;
+
+            mediaImage = new File(myDir.getPath() + imagename);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        FileInputStream fis;
+        try {
+            fis = new FileInputStream(mediaImage);
+            img = BitmapFactory.decodeStream(fis);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        Bitmap m = img;
+        return mediaImage;
+    }
+
+    public static Bitmap getImageBitemap(String imagename) {
+        Bitmap img = null;
+        File mediaImage = null;
+        try {
+            String root = Environment.getExternalStorageDirectory().toString();
+            File myDir = new File(root);
+            if (!myDir.exists())
+                return null;
+
+            mediaImage = new File(myDir.getPath() + imagename);
+            PlantillasFragment.actualURIimg = Uri.fromFile(mediaImage);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        FileInputStream fis;
+        try {
+            fis = new FileInputStream(mediaImage);
+            img = BitmapFactory.decodeStream(fis);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        Bitmap m = img;
+        return img;
+    }
+
+
+    public static boolean checkifImageExists(String imagename) {
+        Bitmap b = null;
+        File file = Util.getImage("/" + imagename + ".jpg");
+        String path = file.getAbsolutePath();
+
+        if (path != null)
+            b = BitmapFactory.decodeFile(path);
+
+        if (b == null || b.equals("")) {
+            return false;
+        }
+        return true;
+    }
+
+
+
 }

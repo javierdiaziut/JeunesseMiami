@@ -40,7 +40,7 @@ public class LoginActivity extends AppCompatActivity {
     public static final int PERMISSIONS_REQUEST = 0;
     protected ProgressDialog mProgressDialog;
     public static String userid;
-
+    public static String nameuser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,7 +93,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
 
-   private void doLogin(String user, String pass){
+   private void doLogin(final String user, String pass){
        userid = "";
        showProgressDialog(getString(R.string.cargando));
        String url = String
@@ -112,6 +112,7 @@ public class LoginActivity extends AppCompatActivity {
                    } catch (JSONException e) {
                        e.printStackTrace();
                    }
+                   nameuser = user;
                    Intent intent = new Intent(LoginActivity.this, NavigationActivity.class);
                    startActivity(intent);
                    txtUser.setText("");

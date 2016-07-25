@@ -10,7 +10,9 @@
     <uses-permission android:name="android.permission.SEND_MMS"/>
     <uses-permission android:name="android.permission.RECEIVE_MMS" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_APN_SETTINGS" />
 
     <application
         android:allowBackup="true"
@@ -29,6 +31,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <service android:name="com.android.mms.transaction.TransactionService"/>
+        <receiver android:name="com.klinker.android.send_message.SentReceiver" >
+            <intent-filter>
+                <action android:name="com.appcontactos.javierdiaz.jeunessemiami.SMS_SENT" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name="com.klinker.android.send_message.DeliveredReceiver" >
+            <intent-filter>
+                <action android:name="com.appcontactos.javierdiaz.jeunessemiami.SMS_DELIVERED" />
+            </intent-filter>
+        </receiver>
         <!--
  ATTENTION: This was auto-generated to add Google Play services to your project for
      App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information.

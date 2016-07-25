@@ -1,12 +1,15 @@
 package com.appcontactos.javierdiaz.jeunessemiami.fragments;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
@@ -19,7 +22,9 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.util.LruCache;
 import android.telephony.SmsManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,17 +34,25 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.Volley;
 import com.appcontactos.javierdiaz.jeunessemiami.R;
 import com.appcontactos.javierdiaz.jeunessemiami.activities.NavigationActivity;
 import com.appcontactos.javierdiaz.jeunessemiami.adaptadores.CustomPlantillasAdapter;
+import com.appcontactos.javierdiaz.jeunessemiami.util.Config;
 import com.appcontactos.javierdiaz.jeunessemiami.util.Util;
-import com.squareup.picasso.Picasso;
+import com.klinker.android.send_message.Message;
+import com.klinker.android.send_message.Settings;
+import com.klinker.android.send_message.Transaction;
 
-import java.net.URI;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,12 +68,15 @@ public class PlantillasFragment extends Fragment {
     private ImageView imgPreviewimg;
     public static final int PERMISSIONS_REQUEST = 10;
     private static final int REQUEST_A_PICTURE = 100;
-    private Uri actualURIimg;
-    private String actualPATHimg = "";
+    public static Uri actualURIimg;
+    private static String actualPATHimg = "";
     private RelativeLayout relativePreviewMMS, relativePreviewSMS;
     private EditText editTextsms;
     private boolean isSMS = Boolean.FALSE;
     private ArrayList<String> numeros = new ArrayList<>();
+    private ProgressBar progressBar;
+    private ImageLoader mImageLoader;
+    private RequestQueue mRequestQueue;
 
 
     public PlantillasFragment() {
@@ -73,6 +89,7 @@ public class PlantillasFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_plantillas, container, false);
         mProgressDialog = new ProgressDialog(getContext());
+        progressBar = (ProgressBar) view.findViewById(R.id.loader_left);
         listViewPlantillas = (ListView) view.findViewById(R.id.listview_plantillas);
         btnPreview = (Button) view.findViewById(R.id.btn_preview_msg);
         btnSend = (Button) view.findViewById(R.id.btn_send_msg);
@@ -96,6 +113,8 @@ public class PlantillasFragment extends Fragment {
         btnPreview.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                imgPreviewimg.setImageResource(R.mipmap.usuario);
+                actualURIimg = null;
                 for (int i = 0; i < NavigationActivity.plantillasMensajes.size(); i++) {
                     if (NavigationActivity.plantillasMensajes.get(i).isChecked() &&
                             (NavigationActivity.plantillasMensajes.get(i).getImagen() != null && !NavigationActivity.plantillasMensajes.get(i).getImagen().isEmpty())) {
@@ -104,6 +123,19 @@ public class PlantillasFragment extends Fragment {
                         relativePreviewSMS.setVisibility(View.GONE);
                         relativePreviewMMS.setVisibility(View.VISIBLE);
                         isSMS = Boolean.FALSE;
+                        if (Util.checkifImageExists(NavigationActivity.plantillasMensajes.get(i).getImagen())) {
+                            Bitmap bm = Util.getImageBitemap("/" + NavigationActivity.plantillasMensajes.get(i).getImagen() + ".jpg");
+                            try {
+                                progressBar.setVisibility(View.GONE);
+                                imgPreviewimg.setImageBitmap(bm);
+                            }catch (Exception e){
+                                Log.d("Error imagen", e.toString());
+                            }
+
+                        } else {
+                            loadImage(NavigationActivity.plantillasMensajes.get(i).getImagen(), Config.url_imagenes + NavigationActivity.plantillasMensajes.get(i).getImagen(), progressBar, imgPreviewimg);
+
+                        }
 
                         break;
                     } else {
@@ -152,11 +184,14 @@ public class PlantillasFragment extends Fragment {
             public void onClick(View v) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     int permissionCamCheck = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA);
+                    int permissionsdCheck = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE);
                     int permissionGalCheck = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
-                    if (permissionCamCheck != PackageManager.PERMISSION_GRANTED || permissionGalCheck != PackageManager.PERMISSION_GRANTED) {
+                    if (permissionCamCheck != PackageManager.PERMISSION_GRANTED || permissionGalCheck != PackageManager.PERMISSION_GRANTED
+                            ||permissionsdCheck != PackageManager.PERMISSION_GRANTED ) {
                         List<String> permissionsNeeded = new ArrayList<String>();
                         permissionsNeeded.add(Manifest.permission.CAMERA);
                         permissionsNeeded.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                        permissionsNeeded.add(Manifest.permission.READ_EXTERNAL_STORAGE);
 
                         requestPermissions(permissionsNeeded.toArray(new String[permissionsNeeded.size()]),
                                 PERMISSIONS_REQUEST);
@@ -181,32 +216,7 @@ public class PlantillasFragment extends Fragment {
 
     }
 
-    /**
-     * show a progress dialog with a custom message
-     *
-     * @param message
-     */
-    public void showProgressDialog(String message) {
-        if (mProgressDialog != null) {
-            mProgressDialog.setMessage(message);
-            mProgressDialog.show();
-        } else {
-            Log.e("MainActivity.class", "Error al mostrar el Progress Dialog");
-        }
-    }
 
-    /**
-     * hide the progress dialog
-     */
-    public void dismissProgressDialog() {
-        if (mProgressDialog != null) {
-            if (mProgressDialog.isShowing()) {
-                mProgressDialog.dismiss();
-            }
-        } else {
-            Log.e("MainActivity.class", "Error al mostrar el Progress Dialog");
-        }
-    }
 
     private void sendMMS(String mensaje) {
         String numeros = "";
@@ -399,5 +409,60 @@ public class PlantillasFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
         NavigationActivity.RETURN_HOME = Boolean.TRUE;
+    }
+
+
+
+    private void loadImage(final String imageName, String urlImage, final ProgressBar mProgressBar, final ImageView mImageView) {
+        mImageLoader = getImageLoader(getContext());
+        mImageLoader.get(urlImage, new ImageLoader.ImageListener() {
+            @Override
+            public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
+                Bitmap bitmap = response.getBitmap();
+                if (bitmap != null) {
+                    mProgressBar.setVisibility(View.GONE);
+                    mImageView.setImageBitmap(bitmap);
+                    if (!Util.checkifImageExists(imageName)) {
+                        String stored = Util.saveToSdCard(bitmap, imageName);
+
+                    }
+                }
+            }
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                mProgressBar.setVisibility(View.GONE);
+            }
+        });
+
+    }
+
+    public ImageLoader getImageLoader(Context context) {
+        mRequestQueue = getRequestQueue(context);
+        if (mImageLoader == null) {
+            mImageLoader = new ImageLoader(mRequestQueue,
+                    new ImageLoader.ImageCache() {
+                        private final LruCache<String, Bitmap>
+                                cache = new LruCache<String, Bitmap>(20);
+
+                        @Override
+                        public Bitmap getBitmap(String url) {
+                            return cache.get(url);
+                        }
+
+                        @Override
+                        public void putBitmap(String url, Bitmap bitmap) {
+                            cache.put(url, bitmap);
+                        }
+                    });
+        }
+        return this.mImageLoader;
+    }
+
+    public RequestQueue getRequestQueue(Context mContext) {
+        if (mRequestQueue == null) {
+            mRequestQueue = Volley.newRequestQueue(mContext.getApplicationContext());
+        }
+        return mRequestQueue;
     }
 }

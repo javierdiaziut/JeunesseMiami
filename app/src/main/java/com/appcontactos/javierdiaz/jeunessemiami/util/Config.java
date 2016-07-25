@@ -22,5 +22,6 @@ public class Config {
     //Endpoint para traer los mensajes
     public static String url_mensaje ="http://104.131.98.76/api-lp/cliente_sms.php";
 
-
+    //Endpoint de las imagenes
+    public static String url_imagenes ="http://45.55.233.142/jeunesse/img/fileinput/";
 }

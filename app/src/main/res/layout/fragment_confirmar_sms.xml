@@ -24,27 +24,68 @@
             android:textStyle="bold" />
     </ScrollView>
 
-
-    <EditText
-        android:id="@+id/edittext_sms"
+    <ScrollView
+        android:id="@+id/scrool2"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_below="@+id/scrool"
-        android:layout_marginBottom="50dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="10dp"
-        android:background="@drawable/edit_text_style"
-        android:gravity="start"
-        android:hint="Escriba su mensaje"
-        android:padding="15dp"
-        android:textSize="18sp" />
+        android:layout_marginTop="20dp">
 
-    <Button
-        android:id="@+id/btn_send_sms"
-        android:layout_width="200dp"
-        android:layout_height="50dp"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:text="@string/enviar_sms" />
+        <RelativeLayout
+            android:id="@+id/relative_sms"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="50dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:background="@drawable/edit_text_style"
+            android:minHeight="400dp">
+
+
+            <EditText
+                android:id="@+id/edittext_sms"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="20dp"
+                android:gravity="start"
+                android:hint="Escriba su mensaje"
+                android:padding="15dp"
+                android:textSize="18sp" />
+
+
+            <ImageView
+                android:id="@+id/imgView_upload_img"
+                android:layout_width="140dp"
+                android:layout_height="140dp"
+                android:layout_below="@+id/edittext_sms"
+                android:layout_centerHorizontal="true"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="10dp"
+                android:src="@mipmap/usuario"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/btn_upload_img"
+                android:layout_width="150dp"
+                android:layout_height="50dp"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:layout_marginBottom="30dp"
+                android:layout_marginRight="15dp"
+                android:text="Imagen" />
+
+            <Button
+                android:id="@+id/btn_send_sms"
+                android:layout_width="150dp"
+                android:layout_height="50dp"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:layout_marginLeft="15dp"
+                android:layout_marginBottom="30dp"
+                android:text="@string/enviar" />
+        </RelativeLayout>
+
+    </ScrollView>
+
+
 </RelativeLayout>

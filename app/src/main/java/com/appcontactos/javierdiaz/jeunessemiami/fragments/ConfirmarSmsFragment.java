@@ -2,9 +2,14 @@ package com.appcontactos.javierdiaz.jeunessemiami.fragments;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.telephony.SmsManager;
@@ -13,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,6 +37,11 @@ public class ConfirmarSmsFragment extends Fragment implements View.OnClickListen
     private Button btnConfirmar;
     private EditText editTextmsg;
     private ArrayList<String> numeros = new ArrayList<>();
+    private ImageView imageViewAdjunto;
+    private Button btnUpload;
+    public static Uri actualURIimg;
+    private static String actualPATHimg = "";
+    private boolean isSMS = Boolean.TRUE;
 
     public ConfirmarSmsFragment() {
         // Required empty public constructor
@@ -50,7 +61,46 @@ public class ConfirmarSmsFragment extends Fragment implements View.OnClickListen
         btnConfirmar = (Button) view.findViewById(R.id.btn_send_sms);
         btnConfirmar.setOnClickListener(this);
         editTextmsg = (EditText) view.findViewById(R.id.edittext_sms);
+        imageViewAdjunto = (ImageView) view.findViewById(R.id.imgView_upload_img);
+        btnUpload = (Button) view.findViewById(R.id.btn_upload_img);
         mostrarSelecionados(txtview_num_seleccionados);
+
+        btnUpload.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    int permissionCamCheck = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA);
+                    int permissionsdCheck = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE);
+                    int permissionGalCheck = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                    if (permissionCamCheck != PackageManager.PERMISSION_GRANTED || permissionGalCheck != PackageManager.PERMISSION_GRANTED
+                            ||permissionsdCheck != PackageManager.PERMISSION_GRANTED ) {
+                        List<String> permissionsNeeded = new ArrayList<String>();
+                        permissionsNeeded.add(Manifest.permission.CAMERA);
+                        permissionsNeeded.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                        permissionsNeeded.add(Manifest.permission.READ_EXTERNAL_STORAGE);
+
+                        requestPermissions(permissionsNeeded.toArray(new String[permissionsNeeded.size()]),
+                                11);
+                    } else {
+                        Intent i = new Intent(
+                                Intent.ACTION_PICK,
+                                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+
+                        startActivityForResult(i, 200);
+                    }
+                } else {
+                    Intent i = new Intent(
+                            Intent.ACTION_PICK,
+                            android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+
+                    startActivityForResult(i, 200);
+                }
+            }
+        });
+
+
+
+
         return view;
     }
 
@@ -87,10 +137,21 @@ public class ConfirmarSmsFragment extends Fragment implements View.OnClickListen
                 requestPermissions(permissionsNeeded.toArray(new String[permissionsNeeded.size()]),
                         2);
             } else {
-                sendSMS(numeros, editTextmsg.getText().toString());
+
+                if(isSMS){
+                    sendSMS(numeros, editTextmsg.getText().toString());
+                }else{
+                    sendMMS(editTextmsg.getText().toString());
+                }
+
             }
         } else {
-            sendSMS(numeros, editTextmsg.getText().toString());
+
+            if(isSMS){
+                sendSMS(numeros, editTextmsg.getText().toString());
+            }else{
+                sendMMS(editTextmsg.getText().toString());
+            }
         }
     }
 
@@ -111,4 +172,42 @@ public class ConfirmarSmsFragment extends Fragment implements View.OnClickListen
         }
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (null != data) {
+            Uri selectedImage = data.getData();
+            actualURIimg = selectedImage;
+            isSMS = Boolean.FALSE;
+            String[] filePathColumn = {MediaStore.Images.Media.DATA};
+
+            Cursor cursor = getActivity().getContentResolver().query(selectedImage,
+                    filePathColumn, null, null, null);
+            cursor.moveToFirst();
+
+            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+            String picturePath = cursor.getString(columnIndex);
+            actualPATHimg = picturePath;
+            cursor.close();
+
+            imageViewAdjunto.setImageBitmap(BitmapFactory.decodeFile(picturePath));
+            imageViewAdjunto.setVisibility(View.VISIBLE);
+
+        }
+    }
+
+    private void sendMMS(String mensaje) {
+        String numeros = "";
+        for (int i = 0; i < NavigationActivity.rows.size(); i++) {
+            if (NavigationActivity.rows.get(i).isChecked()) {
+                numeros += NavigationActivity.rows.get(i).getMobile_number() + ";";
+            }
+        }
+        Intent i = new Intent(Intent.ACTION_SEND);
+        i.putExtra("address", numeros);
+        i.putExtra("sms_body", mensaje);
+        i.putExtra(Intent.EXTRA_STREAM, actualURIimg);
+        i.setType("image/png");
+        startActivity(i);
+
+    }
 }
