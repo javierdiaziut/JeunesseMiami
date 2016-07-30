@@ -77,6 +77,9 @@ public class PlantillasFragment extends Fragment {
     private ProgressBar progressBar;
     private ImageLoader mImageLoader;
     private RequestQueue mRequestQueue;
+    private static int pendingMsg = 0;
+    private static List<String> numerosSeparated = new ArrayList<>();
+    private static String mensaje = "";
 
 
     public PlantillasFragment() {
@@ -128,7 +131,7 @@ public class PlantillasFragment extends Fragment {
                             try {
                                 progressBar.setVisibility(View.GONE);
                                 imgPreviewimg.setImageBitmap(bm);
-                            }catch (Exception e){
+                            } catch (Exception e) {
                                 Log.d("Error imagen", e.toString());
                             }
 
@@ -155,7 +158,7 @@ public class PlantillasFragment extends Fragment {
         btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String mensaje = "";
+
                 String sms = "";
 
                 for (int i = 0; i < NavigationActivity.plantillasMensajes.size(); i++) {
@@ -172,7 +175,11 @@ public class PlantillasFragment extends Fragment {
                     if (isSMS) {
                         sendSMS(sms);
                     } else {
-                        sendMMS(mensaje);
+                        checkNumbers();
+                        if (numerosSeparated.size() > 0) {
+                            sendMMS(mensaje, numerosSeparated);
+                        }
+
                     }
                 }
 
@@ -187,7 +194,7 @@ public class PlantillasFragment extends Fragment {
                     int permissionsdCheck = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE);
                     int permissionGalCheck = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
                     if (permissionCamCheck != PackageManager.PERMISSION_GRANTED || permissionGalCheck != PackageManager.PERMISSION_GRANTED
-                            ||permissionsdCheck != PackageManager.PERMISSION_GRANTED ) {
+                            || permissionsdCheck != PackageManager.PERMISSION_GRANTED) {
                         List<String> permissionsNeeded = new ArrayList<String>();
                         permissionsNeeded.add(Manifest.permission.CAMERA);
                         permissionsNeeded.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
@@ -216,21 +223,26 @@ public class PlantillasFragment extends Fragment {
 
     }
 
+    private void checkNumbers() {
 
-
-    private void sendMMS(String mensaje) {
-        String numeros = "";
         for (int i = 0; i < NavigationActivity.rows.size(); i++) {
             if (NavigationActivity.rows.get(i).isChecked()) {
-                numeros += NavigationActivity.rows.get(i).getMobile_number() + ";";
+                numerosSeparated.add(NavigationActivity.rows.get(i).getMobile_number());
             }
         }
+    }
+
+    private void sendMMS(String mensaje, List<String> destino) {
+
+
         Intent i = new Intent(Intent.ACTION_SEND);
-        i.putExtra("address", numeros);
+        i.putExtra("address", destino.get(0));
         i.putExtra("sms_body", mensaje);
         i.putExtra(Intent.EXTRA_STREAM, actualURIimg);
         i.setType("image/png");
+        destino.remove(0);
         startActivity(i);
+        startActivityForResult(i, 2);
 
     }
 
@@ -274,6 +286,11 @@ public class PlantillasFragment extends Fragment {
 
             imgPreviewimg.setImageBitmap(BitmapFactory.decodeFile(picturePath));
 
+        }
+        if (requestCode == 2) {
+            if (numerosSeparated.size() > 0) {
+                sendMMS(mensaje, numerosSeparated);
+            }
         }
     }
 
@@ -412,7 +429,6 @@ public class PlantillasFragment extends Fragment {
     }
 
 
-
     private void loadImage(final String imageName, String urlImage, final ProgressBar mProgressBar, final ImageView mImageView) {
         mImageLoader = getImageLoader(getContext());
         mImageLoader.get(urlImage, new ImageLoader.ImageListener() {
@@ -464,5 +480,23 @@ public class PlantillasFragment extends Fragment {
             mRequestQueue = Volley.newRequestQueue(mContext.getApplicationContext());
         }
         return mRequestQueue;
+    }
+
+    private void sendMMS2(String mensaje) {
+        numeros.clear();
+        for (int i = 0; i < NavigationActivity.rows.size(); i++) {
+            if (NavigationActivity.rows.get(i).isChecked()) {
+                numeros.add(NavigationActivity.rows.get(i).getMobile_number());
+            }
+        }
+
+        Settings sendSettings = new Settings();
+        Transaction sendTransaction = new Transaction(getContext(), sendSettings);
+        for (int i = 0; i < numeros.size(); i++) {
+            Message mMessage = new Message(mensaje, numeros.get(i));
+            mMessage.setImage(null);
+            sendTransaction.sendNewMessage(mMessage, Transaction.NO_THREAD_ID);
+        }
+
     }
 }

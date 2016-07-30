@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.appcontactos.javierdiaz.jeunessemiami.MainActivity">
+    tools:context="com.appcontactos.javierdiaz.jeunessemiami.activities.NavigationActivity">
 
     <ListView
         android:id="@+id/listview_contactos"
@@ -19,6 +19,16 @@
         android:gravity="center"
         android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true">
+
+        <CheckBox
+            android:id="@+id/checkBox_todos"
+            android:text="TODOS"
+            android:layout_marginLeft="50dp"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:checked="true"
+            android:layout_width="100dp"
+            android:layout_height="match_parent" />
 
         <Button
             android:id="@+id/btn_sincronizar"

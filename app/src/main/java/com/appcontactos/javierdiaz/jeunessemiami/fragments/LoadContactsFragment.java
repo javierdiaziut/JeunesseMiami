@@ -14,6 +14,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -34,6 +36,7 @@ public class LoadContactsFragment extends Fragment implements View.OnClickListen
     private Button btnSincronizar;
     private CustomArrayAdapter customArrayAdapter;
     protected ProgressDialog mProgressDialog;
+    private CheckBox checkBoxTodos;
 
     public LoadContactsFragment() {
         // Required empty public constructor
@@ -52,6 +55,7 @@ public class LoadContactsFragment extends Fragment implements View.OnClickListen
 
         listView_contactos = (ListView) view.findViewById(R.id.listview_contactos);
         btnSincronizar = (Button) view.findViewById(R.id.btn_sincronizar);
+        checkBoxTodos = (CheckBox) view.findViewById(R.id.checkBox_todos);
         btnSincronizar.setOnClickListener(this);
         listItems = new HashMap<>();
 
@@ -65,6 +69,21 @@ public class LoadContactsFragment extends Fragment implements View.OnClickListen
             listView_contactos.setAdapter(customArrayAdapter);
         }
         dismissProgressDialog();
+
+        checkBoxTodos.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    selectAll();
+
+                }else{
+                    unSelectAll();
+
+                }
+
+
+            }
+        });
 
         return view;
     }

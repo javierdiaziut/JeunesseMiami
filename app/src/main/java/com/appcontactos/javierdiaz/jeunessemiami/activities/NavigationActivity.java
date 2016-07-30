@@ -58,6 +58,7 @@ public class NavigationActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nevigation);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle("Ageless4ever");
         setSupportActionBar(toolbar);
         mProgressDialog = new ProgressDialog(this);
 

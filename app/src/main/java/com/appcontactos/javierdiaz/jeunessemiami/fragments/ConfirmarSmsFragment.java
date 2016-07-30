@@ -42,6 +42,8 @@ public class ConfirmarSmsFragment extends Fragment implements View.OnClickListen
     public static Uri actualURIimg;
     private static String actualPATHimg = "";
     private boolean isSMS = Boolean.TRUE;
+    private static List<String> numerosSeparated = new ArrayList<>();
+    private static String mensaje = "";
 
     public ConfirmarSmsFragment() {
         // Required empty public constructor
@@ -137,11 +139,14 @@ public class ConfirmarSmsFragment extends Fragment implements View.OnClickListen
                 requestPermissions(permissionsNeeded.toArray(new String[permissionsNeeded.size()]),
                         2);
             } else {
-
+                mensaje = editTextmsg.getText().toString();
                 if(isSMS){
                     sendSMS(numeros, editTextmsg.getText().toString());
                 }else{
-                    sendMMS(editTextmsg.getText().toString());
+                    checkNumbers();
+                    if (numerosSeparated.size() > 0) {
+                        sendMMS(mensaje, numerosSeparated);
+                    }
                 }
 
             }
@@ -150,7 +155,7 @@ public class ConfirmarSmsFragment extends Fragment implements View.OnClickListen
             if(isSMS){
                 sendSMS(numeros, editTextmsg.getText().toString());
             }else{
-                sendMMS(editTextmsg.getText().toString());
+                sendMMS(mensaje,numerosSeparated);
             }
         }
     }
@@ -193,21 +198,35 @@ public class ConfirmarSmsFragment extends Fragment implements View.OnClickListen
             imageViewAdjunto.setVisibility(View.VISIBLE);
 
         }
-    }
-
-    private void sendMMS(String mensaje) {
-        String numeros = "";
-        for (int i = 0; i < NavigationActivity.rows.size(); i++) {
-            if (NavigationActivity.rows.get(i).isChecked()) {
-                numeros += NavigationActivity.rows.get(i).getMobile_number() + ";";
+        if (requestCode == 2) {
+            if (numerosSeparated.size() > 0) {
+                sendMMS(mensaje, numerosSeparated);
             }
         }
+    }
+
+    private void checkNumbers() {
+
+        for (int i = 0; i < NavigationActivity.rows.size(); i++) {
+            if (NavigationActivity.rows.get(i).isChecked()) {
+                numerosSeparated.add(NavigationActivity.rows.get(i).getMobile_number());
+            }
+        }
+    }
+
+    private void sendMMS(String mensaje, List<String> destino) {
+
+
         Intent i = new Intent(Intent.ACTION_SEND);
-        i.putExtra("address", numeros);
+        i.putExtra("address", destino.get(0));
         i.putExtra("sms_body", mensaje);
         i.putExtra(Intent.EXTRA_STREAM, actualURIimg);
         i.setType("image/png");
+        destino.remove(0);
         startActivity(i);
+        startActivityForResult(i, 2);
 
     }
+
+
 }
