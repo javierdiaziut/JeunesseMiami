@@ -155,7 +155,10 @@ public class ConfirmarSmsFragment extends Fragment implements View.OnClickListen
             if(isSMS){
                 sendSMS(numeros, editTextmsg.getText().toString());
             }else{
-                sendMMS(mensaje,numerosSeparated);
+                checkNumbers();
+                if (numerosSeparated.size() > 0) {
+                    sendMMS(mensaje, numerosSeparated);
+                }
             }
         }
     }

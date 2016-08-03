@@ -284,10 +284,29 @@ public class Util {
         return img;
     }
 
+    public static void getImageUri(String imagename) {
+        File mediaImage = null;
+        try {
+            String root = Environment.getExternalStorageDirectory().toString();
+            File myDir = new File(root);
+            if (!myDir.exists()){
+
+            }
+
+
+            mediaImage = new File(myDir.getPath() + imagename);
+            PlantillasFragment.actualURIimg = Uri.fromFile(mediaImage);
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
+
+
+    }
 
     public static boolean checkifImageExists(String imagename) {
         Bitmap b = null;
-        File file = Util.getImage("/" + imagename + ".jpg");
+        File file = Util.getImage("/" + imagename);
         String path = file.getAbsolutePath();
 
         if (path != null)

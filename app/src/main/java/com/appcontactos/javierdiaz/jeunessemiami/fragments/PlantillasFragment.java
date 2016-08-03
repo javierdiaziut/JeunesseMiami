@@ -127,7 +127,8 @@ public class PlantillasFragment extends Fragment {
                         relativePreviewMMS.setVisibility(View.VISIBLE);
                         isSMS = Boolean.FALSE;
                         if (Util.checkifImageExists(NavigationActivity.plantillasMensajes.get(i).getImagen())) {
-                            Bitmap bm = Util.getImageBitemap("/" + NavigationActivity.plantillasMensajes.get(i).getImagen() + ".jpg");
+                            Bitmap bm = Util.getImageBitemap("/" + NavigationActivity.plantillasMensajes.get(i).getImagen());
+
                             try {
                                 progressBar.setVisibility(View.GONE);
                                 imgPreviewimg.setImageBitmap(bm);
@@ -137,7 +138,7 @@ public class PlantillasFragment extends Fragment {
 
                         } else {
                             loadImage(NavigationActivity.plantillasMensajes.get(i).getImagen(), Config.url_imagenes + NavigationActivity.plantillasMensajes.get(i).getImagen(), progressBar, imgPreviewimg);
-
+                            Util.getImageUri("/" + NavigationActivity.plantillasMensajes.get(i).getImagen());
                         }
 
                         break;
@@ -165,6 +166,27 @@ public class PlantillasFragment extends Fragment {
                     if (NavigationActivity.plantillasMensajes.get(i).isChecked()) {
                         mensaje = NavigationActivity.plantillasMensajes.get(i).getDescripcion() + " Video_link: " + NavigationActivity.plantillasMensajes.get(i).getLink_video();
                         sms = editTextsms.getText().toString();
+                        if (NavigationActivity.plantillasMensajes.get(i).getImagen() != null
+                                && !NavigationActivity.plantillasMensajes.get(i).getImagen().isEmpty()) {
+
+                            if (Util.checkifImageExists(NavigationActivity.plantillasMensajes.get(i).getImagen())) {
+                                Bitmap bm = Util.getImageBitemap("/" + NavigationActivity.plantillasMensajes.get(i).getImagen());
+
+                                try {
+                                    progressBar.setVisibility(View.GONE);
+                                    imgPreviewimg.setImageBitmap(bm);
+                                } catch (Exception e) {
+                                    Log.d("Error imagen", e.toString());
+                                }
+
+                            } else {
+                                loadImage(NavigationActivity.plantillasMensajes.get(i).getImagen(), Config.url_imagenes + NavigationActivity.plantillasMensajes.get(i).getImagen(), progressBar, imgPreviewimg);
+                                Util.getImageUri("/" + NavigationActivity.plantillasMensajes.get(i).getImagen());
+                            }
+
+
+                        }
+
                         break;
                     }
                 }
@@ -440,7 +462,7 @@ public class PlantillasFragment extends Fragment {
                     mImageView.setImageBitmap(bitmap);
                     if (!Util.checkifImageExists(imageName)) {
                         String stored = Util.saveToSdCard(bitmap, imageName);
-
+                        String a = stored;
                     }
                 }
             }
